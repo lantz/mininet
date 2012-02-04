@@ -21,7 +21,11 @@ if [ "$DIST" = "Debian" ]; then
     KERNEL_HEADERS=linux-headers-${KERNEL_NAME}_${KERNEL_NAME}-10.00.Custom_i386.deb
     KERNEL_IMAGE=linux-image-${KERNEL_NAME}_${KERNEL_NAME}-10.00.Custom_i386.deb
 elif [ "$DIST" = "Ubuntu" ]; then
-    KERNEL_NAME=`uname -r`
+    if [ `lsb_release -rs` = "10.04" ]; then
+        KERNEL_NAME='3.0.0-15-generic'
+    else
+        KERNEL_NAME=`uname -r`
+    fi
     KERNEL_HEADERS=linux-headers-${KERNEL_NAME}
 else
     echo "Install.sh currently only supports Ubuntu and Debian."
@@ -41,11 +45,9 @@ OVS_BUILD=$OVS_SRC/build-$KERNEL_NAME
 OVS_KMODS=($OVS_BUILD/datapath/linux/{openvswitch_mod.ko,brcompat_mod.ko})
 
 function kernel {
-    echo "Install Mininet-compatible kernel"
+    echo "Install Mininet-compatible kernel if necessary"
     sudo apt-get update
-    
     if [ "$DIST" = "Debian" ]; then
-        
         # The easy approach: download pre-built linux-image and linux-headers packages:
         wget -c $KERNEL_LOC/$KERNEL_HEADERS
         wget -c $KERNEL_LOC/$KERNEL_IMAGE
@@ -68,7 +70,9 @@ function kernel {
         # /boot/grub/menu.lst to set the default to the entry corresponding to the
         # kernel you just installed.
     fi
-
+    if [ "$DIST" = "Ubuntu" ] &&  [ `lsb_release -rs` = "10.04" ]; then
+        sudo apt-get -y install linux-image-$KERNEL_NAME
+    fi
 }
 
 function kernel_clean {
@@ -87,7 +91,7 @@ function mn_deps {
     sudo aptitude install -y gcc make screen psmisc xterm ssh iperf iproute \
         python-setuptools python-networkx
 
-    if [ "$DIST" = "Ubuntu" ] && [ "`lsb_release -sr`" = "10.04" ]; then
+    if [ "$DIST" = "Ubuntu" ] && [ `lsb_release -rs` = "10.04" ]; then
         echo "Upgrading networkx to avoid deprecation warning"
         sudo easy_install --upgrade networkx
     fi
@@ -311,10 +315,7 @@ function modprobe {
 
 function all {
     echo "Running all commands..."
-    if [ "$DIST" != "Ubuntu" ]; then
-        # Ubuntu ships with Mininet-compatible kernel
-        kernel
-    fi
+    kernel
     mn_deps
     of
     ovs
