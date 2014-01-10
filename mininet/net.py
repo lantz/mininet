@@ -338,11 +338,11 @@ class Mininet( object ):
 
         info( '\n*** Adding links:\n' )
         for srcName, dstName in topo.links(sort=True):
-            src, dst = self.nameToNode[ srcName ], self.nameToNode[ dstName ]
-            params = topo.linkInfo( srcName, dstName )
-            srcPort, dstPort = topo.port( srcName, dstName )
-            self.addLink( src, dst, srcPort, dstPort, **params )
-            info( '(%s, %s) ' % ( src.name, dst.name ) )
+            params = dict( topo.linkInfo( srcName, dstName ) )
+            node1 = self[ params.pop( 'node1' ) ]
+            node2 = self[ params.pop( 'node2' ) ]
+            self.addLink( node1, node2, **params )
+            info( '(%s, %s) ' % ( srcName, dstName ) )
 
         info( '\n' )
 

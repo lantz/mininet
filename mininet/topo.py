@@ -96,8 +96,9 @@ class Topo(object):
            opts: link options (optional)
            returns: link info key"""
         if not opts and self.lopts:
-            opts = self.lopts
-        self.addPort(node1, node2, port1, port2)
+            opts.update( self.lopts )
+        port1, port2 = self.addPort(node1, node2, port1, port2)
+        opts.update(node1=node1, node2=node2, port1=port1, port2=port2)
         key = tuple(self.sorted([node1, node2]))
         self.link_info[key] = opts
         self.g.add_edge(*key)
@@ -119,6 +120,7 @@ class Topo(object):
             dport = len(self.ports[dst]) + dst_base
         self.ports[src][dst] = sport
         self.ports[dst][src] = dport
+        return sport, dport
 
     def nodes(self, sort=True):
         "Return nodes in graph"
