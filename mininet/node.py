@@ -1116,7 +1116,8 @@ class OVSSwitch( Switch ):
         intfs = ' '.join( '-- add-port %s %s ' % ( self, intf ) +
                           '-- set Interface %s ' % intf +
                           'ofport_request=%s ' % self.ports[ intf ]
-                         for intf in self.intfList() if not intf.IP() )
+                         for intf in self.intfList()
+                         if self.ports[ intf ] and not intf.IP() )
         clist = ' '.join( '%s:%s:%d' % ( c.protocol, c.IP(), c.port )
                          for c in controllers )
         if self.listenPort:
