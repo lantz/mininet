@@ -609,8 +609,8 @@ class MininetCluster( Mininet ):
         info( '*** Checking servers\n' )
         for server in self.servers:
             ip = self.serverIP[ server ]
-            if not server:
-                server = 'localhost'
+            if not server or server == 'localhost':
+                 continue
             info( server, '' )
             dest = '%s@%s' % ( self.user, ip )
             cmd = self.sshcmd + [ '-n', dest, 'sudo true' ]
