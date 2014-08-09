@@ -358,6 +358,9 @@ class Link( object ):
             params1 = {}
         if params2 is None:
             params2 = {}
+        # Allow passing in params1=params2
+        if params2 is params1:
+            params2 = dict( params1 )
         if port1 is not None:
             params1[ 'port' ] = port1
         if port2 is not None:
@@ -423,4 +426,4 @@ class TCLink( Link ):
                        cls1=TCIntf,
                        cls2=TCIntf,
                        params1=params,
-                       params2=params)
+                       params2=params )
