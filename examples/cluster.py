@@ -606,10 +606,6 @@ class MininetCluster( Mininet ):
         """Pre-check to make sure connection works and that
            we can call sudo without a password"""
         result = 0
-        if 'SSH_AUTH_SOCK' not in os.environ:
-            error( '*** SSH_AUTH_SOCK is required, but is not set.\n'
-                   '*** You may need to use sudo -E\n' )
-            exit( 1 )
         info( '*** Checking servers\n' )
         for server in self.servers:
             ip = self.serverIP[ server ]
@@ -623,13 +619,13 @@ class MininetCluster( Mininet ):
             if code != 0:
                 error( '\nstartConnection: server connection check failed '
                        'to %s using command:\n%s\n'
-                        % ( server, cmd ) )
+                        % ( server, ' '.join( cmd ) ) )
             result |= code
         if result:
-            error( '*** Precheck failed - please fix the errors reported above.\n'
-                   '*** You may need to run mn -c on all nodes; also make\n'
-                   '*** sure you are using sudo -E and that you can ssh into all\n'
-                   '*** nodes and run sudo without entering a password.\n' )
+            error( '*** Server precheck failed.\n'
+                   '*** Make sure that the above ssh command works correctly.\n'
+                   '*** You may also need to run mn -c on all nodes, and/or\n'
+                   '*** use sudo -E.\n' )
             exit( 1 )
         info( '\n' )
 
