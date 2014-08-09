@@ -170,7 +170,8 @@ class RemoteMixin( object ):
     # Command support via shell process in namespace
     def startShell( self, *args, **kwargs ):
         "Start a shell process for running commands"
-        kwargs.update( mnopts='-c', pty=True)
+        if self.dest:
+            kwargs.update( mnopts='-c' )
         super( RemoteMixin, self ).startShell( *args, **kwargs )
         if self.splitInit:
             self.sendCmd( 'echo $$' )
