@@ -130,7 +130,10 @@ class RemoteMixin( object ):
         if not user:
             user = quietRun( 'who am i' ).split()[ 0 ]
         self.user = user
-        self.dest = '%s@%s' % ( self.user, self.serverIP ) if user else None
+        if self.user and self.server:
+            self.dest = '%s@%s' % ( self.user, self.serverIP )
+        else:
+            self.dest = None
         self.controlPath = controlPath
         self.sshcmd = []
         if self.dest:
