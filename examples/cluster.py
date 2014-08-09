@@ -137,9 +137,9 @@ class RemoteMixin( object ):
         self.controlPath = controlPath
         self.sshcmd = []
         if self.dest:
-            self.sshcmd = self.sshbase
+            self.sshcmd = [ 'sudo', '-E', '-u', self.user ] + self.sshbase
             if self.controlPath:
-                self.sshcmd = self.sshbase + [ '-o', 'ControlPath=' + self.controlPath,
+                self.sshcmd += [ '-o', 'ControlPath=' + self.controlPath,
                                                '-o', 'ControlMaster=auto' ]
             self.sshcmd = self.sshcmd + [ self.dest ]
         self.splitInit = splitInit
@@ -220,9 +220,9 @@ class RemoteMixin( object ):
             returns: Popen() object"""
         if type( cmd ) is str:
             cmd = cmd.split()
-        if sudo:
-            cmd = [ 'sudo', '-E' ] + cmd
         if self.dest:
+            if sudo:
+                cmd = [ 'sudo', '-E' ] + cmd
             if tt:
                 cmd = self.sshcmd + cmd
             else:
@@ -230,8 +230,12 @@ class RemoteMixin( object ):
                 sshcmd = list( self.sshcmd )
                 sshcmd.remove( '-tt' )
                 cmd = sshcmd + cmd
+        else:
+            if self.user and not sudo:
+                # Drop privileges
+                cmd = [ 'sudo', '-E', '-u', self.user ] + cmd
         params.update( preexec_fn=self._ignoreSignal )
-        # print 'POPEN', ' '.join(cmd), params
+        debug( '_popen', ' '.join(cmd), params )
         popen = super( RemoteMixin, self )._popen( cmd, **params )
         return popen
 
@@ -617,7 +621,8 @@ class MininetCluster( Mininet ):
                  continue
             info( server, '' )
             dest = '%s@%s' % ( self.user, ip )
-            cmd = self.sshcmd + [ '-n', dest, 'sudo true' ]
+            cmd = [ 'sudo', '-E', '-u', self.user ]
+            cmd += self.sshcmd + [ '-n', dest, 'sudo true' ]
             debug( ' '.join( cmd ), '\n' )
             out, err, code = errRun( cmd )
             if code != 0:
