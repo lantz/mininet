@@ -22,7 +22,7 @@ if 'PYTHONPATH' in os.environ:
 
 from mininet.clean import cleanup
 from mininet.cli import CLI
-from mininet.log import lg, LEVELS, info, debug, error
+from mininet.log import lg, LEVELS, info, debug, warn, error
 from mininet.net import Mininet, MininetWithControlNet, VERSION
 from mininet.node import ( Host, CPULimitedHost, Controller, OVSController,
                            NOX, RemoteController, DefaultController,
@@ -274,8 +274,8 @@ class MininetRunner( object ):
             exit()
         Net = MininetWithControlNet if inNamespace else Mininet
         if cluster:
-            print '*** WARNING: Experimental cluster mode!'
-            print '*** Using RemoteHost, RemoteOVSSwitch, RemoteLink'
+            warn( '*** WARNING: Experimental cluster mode!\n'
+              '*** Using RemoteHost, RemoteOVSSwitch, RemoteLink\n' )
             host, switch, link = RemoteHost, RemoteOVSSwitch, RemoteLink
             CLI = ClusterCLI
             Net = partial( MininetCluster, servers=cluster.split( ',' ),
