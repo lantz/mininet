@@ -50,7 +50,7 @@ Future enhancements:
 """
 
 import os
-from pty import openpty
+import pty
 import re
 import signal
 import select
@@ -115,14 +115,8 @@ class Node( object ):
         node = cls.outToNode.get( fd )
         return node or cls.inToNode.get( fd )
 
-    def _popen( self, cmd, **params ):
-        """Internal method: spawn and return a process
-           cmd: command to run (list)
-           params: parameters to Popen()"""
-        return Popen( cmd, **params )
-
     # Command support via shell process in namespace
-    def startShell( self, mnopts=None, pty=True ):
+    def startShell( self, mnopts=None ):
         "Start a shell process for running commands"
         if self.shell:
             error( "%s: shell is already running\n" % self.name )
@@ -137,18 +131,14 @@ class Node( object ):
         # prompt is set to sentinel chr( 127 )
         cmd = [ 'mnexec', opts, 'env',  'PS1=' + chr( 127 ),
                 'bash', '--norc', '-mis', 'mininet:' + self.name ]
-        if pty:
-            # Spawn a shell subprocess in a pseudo-tty, to disable buffering
-            # in the subprocess and insulate it from signals (e.g. SIGINT)
-            # received by the parent
-            conn, slave = openpty()
-            self.shell = self._popen( cmd, stdin=slave, stdout=slave,
-                                      stderr=STDOUT, close_fds=False )
-            self.stdin = self.stdout = os.fdopen( conn, 'rw' )
-        else:
-            self.shell = self._popen( cmd, stdin=PIPE, stdout=PIPE,
-                                      stderr=STDOUT, close_fds=True )
-            self.stdin, self.stdout = self.shell.stdin, self.shell.stdout
+        # Spawn a shell subprocess in a pseudo-tty, to disable buffering
+        # in the subprocess and insulate it from signals (e.g. SIGINT)
+        # received by the parent
+        master, slave = pty.openpty()
+        self.shell = self._popen( cmd, stdin=slave, stdout=slave, stderr=slave,
+                                  close_fds=False )
+        self.stdin = os.fdopen( master, 'rw' )
+        self.stdout = self.stdin
         self.pid = self.shell.pid
         self.pollOut = select.poll()
         self.pollOut.register( self.stdout )
@@ -169,6 +159,12 @@ class Node( object ):
             self.pollOut.poll()
         self.waiting = False
         self.cmd( 'stty -echo' )
+
+    def _popen( self, cmd, **params ):
+        """Internal method: spawn and return a process
+            cmd: command to run (list)
+            params: parameters to Popen()"""
+        return Popen( cmd, **params )
 
     def cleanup( self ):
         "Help python collect its garbage."
