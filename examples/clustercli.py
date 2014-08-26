@@ -31,9 +31,10 @@ class DemoCLI( CLI ):
             try:
                 import networkx as nx
                 import matplotlib.pyplot as plt
+                import pygraphviz
             except:
-                error( 'plot requires networkx and matplotlib - '
-                       'please install them and try again' )
+                error( 'plot requires networkx, matplotlib and pygraphviz - '
+                       'please install them and try again\n' )
                 return
         # Make a networkx Graph
         g = nx.Graph()
