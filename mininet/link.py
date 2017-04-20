@@ -44,9 +44,9 @@ class Intf( object ):
         self.mac = mac
         self.ip, self.prefixLen = None, None
 
-        # if interface is lo, we know the ip is 127.0.0.1.
+        # if interface is lo/lo0, we know the ip is 127.0.0.1.
         # This saves an ifconfig command per node
-        if self.name == 'lo':
+        if self.name == 'lo' or self.name == 'lo0':
             self.ip = '127.0.0.1'
             self.prefixLen = 8
         # Add to node (and move ourselves if necessary )
