@@ -2,21 +2,12 @@
 
 from mininet.util import quietRun
 from mininet.log import info, error, debug
-from os import environ
+from os import environ, uname
 
-def lsmod():
-    "Return output of lsmod."
-    return quietRun( 'lsmod' )
-
-def rmmod( mod ):
-    """Return output of lsmod.
-       mod: module string"""
-    return quietRun( [ 'rmmod', mod ] )
-
-def modprobe( mod ):
-    """Return output of modprobe
-       mod: module string"""
-    return quietRun( [ 'modprobe', mod ] )
+if uname()[ 0 ] == 'FreeBSD':
+    from mininet.util_freebsd import ( lsmod, rmmod, modprobe )
+else:
+    from mininet.util_linux import ( lsmod, rmmod, modprobe )
 
 OF_KMOD = 'ofdatapath'
 OVS_KMOD = 'openvswitch_mod'  # Renamed 'openvswitch' in OVS 1.7+/Linux 3.5+

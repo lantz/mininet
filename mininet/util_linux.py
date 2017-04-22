@@ -4,6 +4,7 @@ OS-specific utility functions for Linux, counterpart to util.py.
 
 from resource import getrlimit, setrlimit, RLIMIT_NPROC, RLIMIT_NOFILE
 from mininet.log import error, warn, debug
+from mininet.util import ( quietRun, retry )
 
 
 LO='lo'                   # loopback name.
@@ -58,6 +59,10 @@ def makeIntfPair( intf1, intf2, addr1=None, addr2=None, node1=None, node2=None,
         raise Exception( "Error creating interface pair (%s,%s): %s " %
                          ( intf1, intf2, cmdOutput ) )
 
+def deleteCmd( intf, node=None ):
+    """Command to destroy an interface."""
+    return 'ip link del ' + intf
+
 def moveIntfNoRetry( intf, dstNode, printError=False ):
     """Move interface to node, without retrying.
        intf: string, interface
@@ -76,9 +81,15 @@ def moveIntfNoRetry( intf, dstNode, printError=False ):
         return False
     return True
 
-def deleteCmd( intf, node=None ):
-    """Command to destroy an interface."""
-    return 'ip link del ' + intf
+# duplicate in util_freebsd
+def moveIntf( intf, dstNode, printError=True,
+              retries=3, delaySecs=0.001 ):
+    """Move interface to node, retrying on failure.
+       intf: string, interface
+       dstNode: destination Node
+       printError: if true, print error"""
+    retry( retries, delaySecs, moveIntfNoRetry, intf, dstNode,
+           printError=printError )
 
 # Other stuff we use
 def sysctlTestAndSet( name, limit ):
@@ -156,3 +167,19 @@ def numCores():
     except ValueError:
         return 0
     return numCores.ncores
+
+# Kernel module manipulation
+
+def lsmod():
+    "Return output of lsmod."
+    return quietRun( 'lsmod' )
+
+def rmmod( mod ):
+    """Return output of lsmod.
+       mod: module string"""
+    return quietRun( [ 'rmmod', mod ] )
+
+def modprobe( mod ):
+    """Return output of modprobe
+       mod: module string"""
+    return quietRun( [ 'modprobe', mod ] )

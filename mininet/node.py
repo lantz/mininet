@@ -57,18 +57,18 @@ import re
 from subprocess import Popen
 from time import sleep
 
-if os.uname()[0] == 'FreeBSD':
-    from mininet.libfreebsd import Node
+if os.uname()[ 0 ] == 'FreeBSD':
+    from mininet.libfreebsd import Node, Intf
     from mininet.util_freebsd import ( LO, DP_MODE, numCores )
 else:
-    from mininet.liblinux import Node
+    from mininet.liblinux import Node, Intf
     from mininet.util_freebsd import ( LO, DP_MODE, numCores, mountCgroups )
 
 from mininet.log import info, error, warn, debug
 from mininet.util import ( quietRun, errRun, errFail, moveIntf, isShellBuiltin,
                            retry )
 from mininet.moduledeps import moduleDeps, pathCheck, TUN
-from mininet.link import Link, Intf, TCIntf, OVSIntf
+from mininet.link import Link, TCIntf, OVSIntf
 from re import findall
 from distutils.version import StrictVersion
 

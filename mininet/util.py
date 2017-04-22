@@ -12,12 +12,6 @@ from os import O_NONBLOCK
 import os
 from functools import partial
 
-if os.uname()[0] == 'FreeBSD':
-    from mininet.util_freebsd import moveIntfNoRetry
-else:
-    from mininet.util_linux import moveIntfNoRetry
-
-
 # Command execution support
 
 def run( cmd ):
@@ -163,15 +157,6 @@ def retry( retries, delaySecs, fn, *args, **keywords ):
     if tries >= retries:
         error( "*** gave up after %i retries\n" % tries )
         exit( 1 )
-
-def moveIntf( intf, dstNode, printError=True,
-              retries=3, delaySecs=0.001 ):
-    """Move interface to node, retrying on failure.
-       intf: string, interface
-       dstNode: destination Node
-       printError: if true, print error"""
-    retry( retries, delaySecs, moveIntfNoRetry, intf, dstNode,
-           printError=printError )
 
 # Support for dumping network
 

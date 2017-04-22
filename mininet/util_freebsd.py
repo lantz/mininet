@@ -4,6 +4,7 @@ OS-specific utility functions for FreeBSD, counterpart to util.py.
 
 from mininet.log import output, error, warn, debug
 from resource import getrlimit, setrlimit, RLIMIT_NPROC, RLIMIT_NOFILE
+from mininet.util import ( quietRun, retry )
 
 
 LO='lo0'                       # loopback name.
@@ -88,6 +89,16 @@ def moveIntfNoRetry( intf, dstNode, printError=False ):
         return False
     return True
 
+# duplicate in util_linux
+def moveIntf( intf, dstNode, printError=True,
+              retries=3, delaySecs=0.001 ):
+    """Move interface to node, retrying on failure.
+       intf: string, interface
+       dstNode: destination Node
+       printError: if true, print error"""
+    retry( retries, delaySecs, moveIntfNoRetry, intf, dstNode,
+           printError=printError )
+
 # Other stuff we use
 def sysctlTestAndSet( name, limit ):
     "Helper function to set sysctl limits"
@@ -149,3 +160,19 @@ def numCores():
     except ValueError:
         return 0
     return numCores.ncores
+
+# Kernel module manipulation
+
+def lsmod():
+    """Return list of currently loaded kernel modules."""
+    return quietRun( 'kldstat' )
+
+def rmmod( mod ):
+    """Attempt to unload a specified module.
+       mod: module string"""
+    return quietRun( [ 'kldunload', mod ] )
+
+def modprobe( mod ):
+    """Attempt to load a specified module.
+       mod: module string"""
+    return quietRun( [ 'kldload', mod ] )

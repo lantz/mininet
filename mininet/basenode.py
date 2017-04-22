@@ -10,14 +10,14 @@ import select
 from subprocess import Popen, PIPE
 
 if os.uname()[0] == 'FreeBSD':
-    from mininet.util_freebsd import LO
+    from mininet.util_freebsd import LO, moveIntf
 else:
-    from mininet.util_linux import LO
+    from mininet.util_linux import LO, moveIntf
 
 from mininet.log import info, error, warn, debug
-from mininet.util import ( quietRun, moveIntf, isShellBuiltin )
+from mininet.util import ( quietRun, isShellBuiltin )
 from mininet.moduledeps import pathCheck
-from mininet.link import Link, Intf
+from mininet.link import Link
 from re import findall
 
 
