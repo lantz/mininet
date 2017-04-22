@@ -10,10 +10,6 @@ components.
 from subprocess import Popen
 from mininet.util import quietRun
 
-def interrupt( intr=chr( 3 ), fd=None, cmd=None ):
-    """ Send an interrupt to the current process """
-    os.write( fd, intr )
-
 class Node( BaseNode ):
     """A virtual network node that manipulates and tracks namespaces."""
 
@@ -100,6 +96,11 @@ class Node( BaseNode ):
             cmd = ' '.join( cmd )
         popen = self._popen( cmd, **defaults )
         return popen
+
+    def sendInt( self, intr=chr( 3 ) ):
+        "Interrupt running command."
+        debug( 'sendInt: writing chr(%d)\n' % ord( intr ) )
+        self.write( intr )
 
     def setHostRoute( self, ip, intf ):
         """Add route to host.

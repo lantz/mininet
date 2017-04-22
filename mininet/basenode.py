@@ -8,15 +8,17 @@ import re
 import signal
 import select
 from subprocess import Popen, PIPE
-from time import sleep
+
+if os.uname()[0] == 'FreeBSD':
+    from mininet.util_freebsd import LO
+else:
+    from mininet.util_linux import LO
 
 from mininet.log import info, error, warn, debug
-from mininet.util import ( quietRun, errRun, errFail, moveIntf, isShellBuiltin,
-                           numCores, retry, mountCgroups )
-from mininet.moduledeps import moduleDeps, pathCheck, TUN
-from mininet.link import Link, Intf, TCIntf, OVSIntf
+from mininet.util import ( quietRun, moveIntf, isShellBuiltin )
+from mininet.moduledeps import pathCheck
+from mininet.link import Link, Intf
 from re import findall
-from distutils.version import StrictVersion
 
 
 class BaseNode( object ):
@@ -216,11 +218,6 @@ class BaseNode( object ):
         self.write( cmd + '\n' )
         self.lastPid = None
         self.waiting = True
-
-    def sendInt( self, intr=chr( 3 ) ):
-        "Interrupt running command."
-        debug( 'sendInt: writing chr(%d)\n' % ord( intr ) )
-        platform.intr( intr, self.stdin.fileno(), self.lastCmd )
 
     def monitor( self, timeoutms=None, findPid=True ):
         """Monitor and return the output of a command.
@@ -485,7 +482,7 @@ class BaseNode( object ):
         self.setParam( r, 'setIP', ip=ip )
         self.setParam( r, 'setDefaultRoute', defaultRoute=defaultRoute )
         # This should be examined
-        self.cmd( 'ifconfig %s %s' % ( platform.lo, lo ) )
+        self.cmd( 'ifconfig %s %s' % ( LO, lo ) )
         return r
 
     def configDefault( self, **moreParams ):

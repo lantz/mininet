@@ -1,10 +1,9 @@
 "Utility functions for Mininet."
 
 
-from mininet.log import output, info, error, warn, debug
+from mininet.log import output, info, error, debug
 
 from time import sleep
-from resource import getrlimit, setrlimit, RLIMIT_NPROC, RLIMIT_NOFILE
 from select import poll, POLLIN, POLLHUP
 from subprocess import call, check_call, Popen, PIPE, STDOUT
 import re
@@ -12,6 +11,12 @@ from fcntl import fcntl, F_GETFL, F_SETFL
 from os import O_NONBLOCK
 import os
 from functools import partial
+
+if os.uname()[0] == 'FreeBSD':
+    from mininet.util_freebsd import moveIntfNoRetry
+else:
+    from mininet.util_linux import moveIntfNoRetry
+
 
 # Command execution support
 
@@ -335,13 +340,6 @@ def pmonitor(popens, timeoutms=500, readline=True,
                     del popens[ host ]
         else:
             yield None, ''
-
-def rlimitTestAndSet( name, limit ):
-    "Helper function to set rlimits"
-    soft, hard = getrlimit( name )
-    if soft < limit:
-        hardLimit = hard if limit < hard else limit
-        setrlimit( name, ( limit, hardLimit ) )
 
 def natural( text ):
     "To sort sanely/alphabetically: sorted( l, key=natural )"

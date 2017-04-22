@@ -2,34 +2,22 @@
 OS-specific utility functions for FreeBSD, counterpart to util.py.
 """
 
-from mininet.log import output, info, error, warn, debug
-
-from time import sleep
+from mininet.log import output, error, warn, debug
 from resource import getrlimit, setrlimit, RLIMIT_NPROC, RLIMIT_NOFILE
-from select import poll, POLLIN, POLLHUP
-from subprocess import call, check_call, Popen, PIPE, STDOUT
-import re
-from fcntl import fcntl, F_GETFL, F_SETFL
-from os import O_NONBLOCK
-import os
-from functools import partial
+
+
+LO='lo0'                       # loopback name.
+DP_MODE='user'                 # OVS mode - 'user' or 'kernel'.
 
 # Interface management
 #
 # Interfaces are managed as strings which are simply the
 # interface names, of the form 'nodeN-ethM'.
 #
-# To connect nodes, we create a pair of veth interfaces, and then place them
-# in the pair of nodes that we want to communicate. We then update the node's
-# list of interfaces and connectivity map.
+# To connect nodes, we create virtual ethernet pairs (epairs), and then place
+# them in the pair of nodes that we want to communicate. We then update the
+# node's list of interfaces and connectivity map.
 #
-# For the kernel datapath, switch interfaces
-# live in the root namespace and thus do not have to be
-# explicitly moved.
-
-
-lo='lo0'                       # loopback name.
-dpath='user'                   # OVS mode - 'user' or 'kernel'.
 
 def makeIntfPair( intf1, intf2, addr1=None, addr2=None, node1=None, node2=None,
                   deleteIntfs=True, runCmd=None ):

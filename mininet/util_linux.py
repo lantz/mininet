@@ -2,17 +2,12 @@
 OS-specific utility functions for Linux, counterpart to util.py.
 """
 
-from mininet.log import output, info, error, warn, debug
-
-from time import sleep
 from resource import getrlimit, setrlimit, RLIMIT_NPROC, RLIMIT_NOFILE
-from select import poll, POLLIN, POLLHUP
-from subprocess import call, check_call, Popen, PIPE, STDOUT
-import re
-from fcntl import fcntl, F_GETFL, F_SETFL
-from os import O_NONBLOCK
-import os
-from functools import partial
+from mininet.log import error, warn, debug
+
+
+LO='lo'                   # loopback name.
+DP_MODE='kernel'          # OVS mode - 'user' or 'kernel'.
 
 # Interface management
 #
@@ -26,10 +21,6 @@ from functools import partial
 # For the kernel datapath, switch interfaces
 # live in the root namespace and thus do not have to be
 # explicitly moved.
-
-
-lo='lo'                   # loopback name.
-dpath='kernel'            # OVS mode - 'user' or 'kernel'.
 
 def makeIntfPair( intf1, intf2, addr1=None, addr2=None, node1=None, node2=None,
                   deleteIntfs=True, runCmd=None ):
@@ -107,6 +98,13 @@ def sysctlTestAndSet( name, limit ):
             #overwrite non-integer limits
             with open( name, 'w' ) as writeFile:
                 writeFile.write( limit )
+
+def rlimitTestAndSet( name, limit ):
+    "Helper function to set rlimits"
+    soft, hard = getrlimit( name )
+    if soft < limit:
+        hardLimit = hard if limit < hard else limit
+        setrlimit( name, ( limit, hardLimit ) )
 
 def fixLimits():
     "Fix ridiculously small resource limits."

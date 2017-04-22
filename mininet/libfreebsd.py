@@ -14,10 +14,6 @@ from subprocess import Popen
 from mininet.basenode import BaseNode
 from mininet.util import quietRun
 
-def interrupt( intr=None, fd=None, cmd=None ):
-    """ Send an interrupt to the current process """
-    quietRun( "pkill -2 -f -- '%s'" % cmd )
-
 class Node( BaseNode ):
     """A virtual network node that manipulates and tracks jails."""
 
@@ -131,6 +127,10 @@ class Node( BaseNode ):
             cmd = ' '.join( cmd )
         popen = self._popen( cmd, **defaults )
         return popen
+
+    def sendInt( self, intr=chr( 3 ) ):
+        "Interrupt running command."
+        quietRun( "pkill -2 -f -- '%s'" % self.lastCmd )
 
     def setHostRoute( self, ip, intf ):
         """Add route to host.
