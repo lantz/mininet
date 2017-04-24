@@ -89,7 +89,7 @@ def _ifconfigClean():
         info( "*** Removing tap9 - assuming it's from cluster edition\n" )
         sh( 'ifconfig tap9 destroy' )
 
-if uname()[0] == 'FreeBSD':
+if uname()[ 0 ] == 'FreeBSD':
     cleanLinks = _ifconfigClean
     pidsFunc = _popenPids
     cleanNodes = killnodes

@@ -25,7 +25,7 @@ Link: basic link class for creating veth pairs
 """
 from os import uname
 
-if uname()[0] == 'FreeBSD':
+if uname()[ 0 ] == 'FreeBSD':
     from mininet.libfreebsd import Intf
 else:
     from mininet.liblinux import Intf

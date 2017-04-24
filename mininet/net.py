@@ -96,7 +96,7 @@ from time import sleep
 from itertools import chain, groupby
 from math import ceil
 
-if os.uname()[ 1 ] == 'FreeBSD':
+if os.uname()[ 0 ] == 'FreeBSD':
     from mininet.libfreebsd import Node, Intf
     from mininet.util_freebsd import fixLimits, numCores
 else:

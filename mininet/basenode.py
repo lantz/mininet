@@ -9,7 +9,7 @@ import signal
 import select
 from subprocess import Popen, PIPE
 
-if os.uname()[0] == 'FreeBSD':
+if os.uname()[ 0 ] == 'FreeBSD':
     from mininet.util_freebsd import LO, moveIntf
 else:
     from mininet.util_linux import LO, moveIntf

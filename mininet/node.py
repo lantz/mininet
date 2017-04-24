@@ -364,7 +364,7 @@ class RctlHost( Host ):
         return time
 
 
-CPULimitedHost = RctlHost if os.uname()[0] == 'FreeBSD' else CgroupHost
+CPULimitedHost = RctlHost if os.uname()[ 0 ] == 'FreeBSD' else CgroupHost
 
 
 # Some important things to note:
