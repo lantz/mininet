@@ -145,11 +145,12 @@ class Node( BaseNode ):
            intf: Intf or {dev <intfname> via <gw-ip> ...}"""
         # Note setParam won't call us if intf is none
         if isinstance( intf, basestring ):
-            if ' ' in intf:
+            argv = intf.split(' ')
+            if 'via' not in argv[ 0 ]:
                 warn( '%s: setDefaultRoute takes a port name but we got: %s\n' %
                       ( self.name, intf ) )
                 return
-            params = intf
+            params = argv[ -1 ]
         else:
             params = intf.IP()
         # Do this in one line in case we're messing with the root namespace

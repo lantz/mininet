@@ -96,13 +96,20 @@ from time import sleep
 from itertools import chain, groupby
 from math import ceil
 
+if os.uname()[ 1 ] == 'FreeBSD':
+    from mininet.libfreebsd import Node, Intf
+    from mininet.util_freebsd import fixLimits, numCores
+else:
+    from mininet.liblinux import Node, Intf
+    from mininet.util_freebsd import fixLimits, numCores
+
 from mininet.cli import CLI
 from mininet.log import info, error, debug, output, warn
-from mininet.node import ( Node, Host, OVSKernelSwitch, DefaultController,
-                           Controller )
+from mininet.node import ( Host, OVSKernelSwitch, DefaultController,
+                           Controller, RctlHost )
 from mininet.nodelib import NAT
-from mininet.link import Link, Intf
-from mininet.util import ( quietRun, fixLimits, numCores, ensureRoot,
+from mininet.link import Link
+from mininet.util import ( quietRun, ensureRoot,
                            macColonHex, ipStr, ipParse, netParse, ipAdd,
                            waitListening )
 from mininet.term import cleanUpScreens, makeTerms
@@ -696,7 +703,7 @@ class Mininet( object ):
         m = re.search( r, pingOutput )
         if m is not None:
             return errorTuple
-        r = r'(\d+) packets transmitted, (\d+) received'
+        r = r'(\d+) packets transmitted, (\d+)( packets)? received'
         m = re.search( r, pingOutput )
         if m is None:
             error( '*** Error: could not parse ping output: %s\n' %
@@ -846,11 +853,10 @@ class Mininet( object ):
         duration: test duration in seconds (integer)
         returns a single list of measured CPU fractions as floats.
         """
-        cores = int( quietRun( 'nproc' ) )
         pct = cpu * 100
         info( '*** Testing CPU %.0f%% bandwidth limit\n' % pct )
         hosts = self.hosts
-        cores = int( quietRun( 'nproc' ) )
+        cores = numCores()
         # number of processes to run a while loop on per host
         num_procs = int( ceil( cores * cpu ) )
         pids = {}
@@ -864,17 +870,26 @@ class Mininet( object ):
         # get the initial cpu time for each host
         for host in hosts:
             outputs[ host ] = []
-            with open( '/sys/fs/cgroup/cpuacct/%s/cpuacct.usage' %
-                       host, 'r' ) as f:
-                time[ host ] = float( f.read() )
+            if isinstance( host, RctlHost ):
+                time[ host ] = host.getCPUTime( pids[ host ] )
+            else:
+                with open( '/sys/fs/cgroup/cpuacct/%s/cpuacct.usage' %
+                           host, 'r' ) as f:
+                    time[ host ] = float( f.read() )
         for _ in range( duration ):
             sleep( 1 )
             for host in hosts:
-                with open( '/sys/fs/cgroup/cpuacct/%s/cpuacct.usage' %
-                           host, 'r' ) as f:
-                    readTime = float( f.read() )
-                outputs[ host ].append( ( ( readTime - time[ host ] )
-                                        / 1000000000 ) / cores * 100 )
+                if isinstance( host, RctlHost ):
+                    readTime = host.getCPUTime( pids[ host ] )
+                    # is procstat output per-core?
+                    outputs[ host ].append( ( readTime - time[ host ] )
+                                            / cores * 100 )
+                else:
+                    with open( '/sys/fs/cgroup/cpuacct/%s/cpuacct.usage' %
+                               host, 'r' ) as f:
+                        readTime = float( f.read() )
+                    outputs[ host ].append( ( ( readTime - time[ host ] )
+                                            / 1000000000 ) / cores * 100 )
                 time[ host ] = readTime
         for h, pids in pids.items():
             for pid in pids:

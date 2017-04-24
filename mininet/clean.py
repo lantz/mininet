@@ -9,7 +9,7 @@ code), this script may be used to get rid of unwanted garbage.
 It may also get rid of 'false positives', but hopefully
 nothing irreplaceable!
 """
-
+from os import uname
 from subprocess import ( Popen, PIPE, check_output as co,
                          CalledProcessError )
 import time
@@ -17,26 +17,86 @@ import time
 from mininet.log import info
 from mininet.term import cleanUpScreens
 
-
 def sh( cmd ):
     "Print a command and send it to the shell"
     info( cmd + '\n' )
     return Popen( [ '/bin/sh', '-c', cmd ], stdout=PIPE ).communicate()[ 0 ]
 
-def killprocs( pattern ):
+def _coPids( pattern ):
+    try:
+        return co( [ 'pgrep', '-f', pattern ] )
+    except CalledProcessError:
+        return ''
+
+def _popenPids( pattern ):
+    try:
+        p1 = Popen( [ 'ps' ], stdout=PIPE )
+        pids = co( [ 'awk', '/%s/{print $1}' % pattern ], stdin=p1.stdout )
+        p1.stdout.close()
+        return pids
+    except CalledProcessError:
+        return ''
+
+def killprocs( pidsFunc, pattern ):
     "Reliably terminate processes matching a pattern (including args)"
     sh( 'pkill -9 -f %s' % pattern )
     # Make sure they are gone
     while True:
-        try:
-            pids = co( [ 'pgrep', '-f', pattern ] )
-        except CalledProcessError:
-            pids = ''
+        pids = pidsFn( pattern )
         if pids:
             sh( 'pkill -9 -f %s' % pattern )
             time.sleep( .5 )
         else:
             break
+
+def killnodes( pidsFunc, pattern='[m]ininet' ):
+    "kill processes representing nodes"
+    killprocs( pidsFunc, pattern )
+    nodes = sh( 'jls name' ).split('\n')
+    for node in nodes:
+        if 'mininet:' in node:
+            sh( 'jail -r %s 2>/dev/null' % node )
+
+def _iplinkClean():
+    """ link cleanup using 'ip link' """
+    links = sh( "ip link show | "
+                "egrep -o '([-_.[:alnum:]]+-eth[[:digit:]]+)'"
+                ).splitlines()
+    # Delete blocks of links
+    n = 1000  # chunk size
+    for i in range( 0, len( links ), n ):
+        cmd = ';'.join( 'ip link del %s' % link
+                         for link in links[ i : i + n ] )
+        sh( '( %s ) 2> /dev/null' % cmd )
+
+    if 'tap9' in sh( 'ip link show' ):
+        info( "*** Removing tap9 - assuming it's from cluster edition\n" )
+        sh( 'ip link del tap9' )
+
+def _ifconfigClean():
+    """ link cleanup with 'ifconfig'"""
+    links = sh( "ifconfig -l | "
+                "egrep -o '([-_.[:alnum:]]+-eth[[:digit:]]+)'"
+                ).splitlines()
+    # Delete blocks of links
+    n = 1000  # chunk size
+    for i in range( 0, len( links ), n ):
+        cmd = ';'.join( 'ifconfig %s destroy' % link
+                         for link in links[ i : i + n ] )
+        sh( '( %s ) 2> /dev/null' % cmd )
+
+    if 'tap9' in sh( 'ifconfig -l' ):
+        info( "*** Removing tap9 - assuming it's from cluster edition\n" )
+        sh( 'ifconfig tap9 destroy' )
+
+if uname()[0] == 'FreeBSD':
+    cleanLinks = _ifconfigClean
+    pidsFunc = _popenPids
+    cleanNodes = killnodes
+else:
+    cleanLinks = _iplinkClean
+    pidsFunc = _coPids
+    cleanNodes = killprocs
 
 class Cleanup( object ):
     "Wrapper for cleanup()"
@@ -88,26 +148,14 @@ class Cleanup( object ):
             sh( 'ovs-vsctl del-br ' + dp )
 
         info( "*** Removing all links of the pattern foo-ethX\n" )
-        links = sh( "ip link show | "
-                    "egrep -o '([-_.[:alnum:]]+-eth[[:digit:]]+)'"
-                    ).splitlines()
-        # Delete blocks of links
-        n = 1000  # chunk size
-        for i in range( 0, len( links ), n ):
-            cmd = ';'.join( 'ip link del %s' % link
-                             for link in links[ i : i + n ] )
-            sh( '( %s ) 2> /dev/null' % cmd )
-
-        if 'tap9' in sh( 'ip link show' ):
-            info( "*** Removing tap9 - assuming it's from cluster edition\n" )
-            sh( 'ip link del tap9' )
+        cleanLinks()
 
         info( "*** Killing stale mininet node processes\n" )
-        killprocs( 'mininet:' )
+        cleanNodes( pidsFunc, '[m]ininet:' )
 
         info( "*** Shutting down stale tunnels\n" )
-        killprocs( 'Tunnel=Ethernet' )
-        killprocs( '.ssh/mn')
+        killprocs( pidsFunc, '[T]unnel=Ethernet' )
+        killprocs( pidsFunc, '.ssh\/mn' )
         sh( 'rm -f ~/.ssh/mn/*' )
 
         # Call any additional cleanup code if necessary
