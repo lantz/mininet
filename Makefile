@@ -20,7 +20,7 @@ include config.mk
 all: codecheck test
 
 clean:
-	rm -rf config.mk build dist *.egg-info *.pyc $(MNEXEC) $(MANPAGES) $(DOCDIRS)
+	rm -rf config.mk util/install.sh build dist *.egg-info *.pyc $(MNEXEC) $(MANPAGES) $(DOCDIRS)
 
 codecheck: $(PYSRC)
 	-echo "Running code check"

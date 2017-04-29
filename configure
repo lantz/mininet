@@ -6,15 +6,19 @@ OS=`uname`
 case $OS in
     *Linux*)
         prefix='/usr'
+        inst=$(pwd)/util/install-linux.sh
         ;;
     *FreeBSD*)
         prefix='/usr/local'
+        inst=$(pwd)/util/install-freebsd.sh
         ;;
     *)
         echo "Unknown platform: $OS"
         exit 1
         ;;
 esac
+
+ln -s $inst $(pwd)/util/install.sh
 
 echo "export BINDIR=$prefix/bin"                         >> config.mk
 echo "export MANDIR=$prefix/man/man1"                    >> config.mk
