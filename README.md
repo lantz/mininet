@@ -6,6 +6,10 @@ Mininet 2.3.0d1
 
 [![Build Status][1]](https://travis-ci.org/mininet/mininet)
 
+*This is a heavily refactored version of Mininet that also supports FreeBSD,
+and is aimed to make it easier to add support for non-Linux systems. As
+such, the native install instructions are slightly different.*
+
 ### What is Mininet?
 
 Mininet emulates a complete network of hosts, links, and switches
