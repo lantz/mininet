@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# everything should be in /usr/local, but to keep things unchanged for Linux...
+
+OS=`uname`
+case $OS in
+    *Linux*)
+        prefix='/usr'
+        ;;
+    *FreeBSD*)
+        prefix='/usr/local'
+        ;;
+    *)
+        echo "Unknown platform: $OS"
+        exit 1
+        ;;
+esac
+
+echo "export BINDIR=$prefix/bin"                         >> config.mk
+echo "export MANDIR=$prefix/man/man1"                    >> config.mk
+echo "export PKGDIR=$prefix/lib/python2.7/site-packages" >> config.mk
