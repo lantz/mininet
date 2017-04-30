@@ -7,7 +7,7 @@ from os import uname
 
 from mininet.node import Node, Switch
 from mininet.log import info, warn
-from mininet.moduledeps import pathCheck
+from mininet.moduledeps import lsmod, rmmod, modprobe, pathCheck
 from mininet.util import quietRun
 
 

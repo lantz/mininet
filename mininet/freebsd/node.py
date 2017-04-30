@@ -8,7 +8,7 @@ virtualization (see vnet(9)). Links are created by epair(4)s.
 This is a collection of helpers that call the right commands to manipulate these
 components.
 """
-from subprocess import Popen
+from subprocess import PIPE, Popen
 from mininet.basenode import BaseNode
 from mininet.util import quietRun
 
@@ -19,7 +19,7 @@ class Node( BaseNode ):
         BaseNode.__init__( self, name, inNamespace, **params )
         self.jid = None                                             # string
 
-    def shell( self, master, slave, mnopts=None ):
+    def getShell( self, master, slave, mnopts=None ):
         """
         Starts a shell used by the node to run commands. If inNamespace=True,
         this is a two-stage process where a persistent vnet jail is started,

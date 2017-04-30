@@ -73,7 +73,7 @@ class BaseNode( object ):
         node = cls.outToNode.get( fd )
         return node or cls.inToNode.get( fd )
 
-    def shell( self, master, slave, mnopts=None ):
+    def getShell( self, master, slave, mnopts=None ):
         # OS-specific virtualization method - overriden in system nodes
         pass
 
@@ -88,7 +88,7 @@ class BaseNode( object ):
         # in the subprocess and insulate it from signals (e.g. SIGINT)
         # received by the parent
         master, slave = pty.openpty()
-        self.shell = self.shell( master, slave, mnopts )
+        self.shell = self.getShell( master, slave, mnopts )
         self.stdin = os.fdopen( master, 'rw' )
         self.stdout = self.stdin
         self.pid = self.shell.pid

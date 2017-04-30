@@ -7,7 +7,7 @@ Links are veth device pairs (see ip link(8)).
 This is a collection of helpers that call the right commands to manipulate these
 components.
 """
-from subprocess import Popen
+from subprocess import PIPE, Popen
 from mininet.util import quietRun
 
 class Node( BaseNode ):
@@ -16,7 +16,7 @@ class Node( BaseNode ):
     def __init__( self, name, inNamespace=True, **params ):
         BaseNode.__init__( self, name, inNamespace, **params )
 
-    def shell( self, master, slave, mnopts=None ):
+    def getShell( self, master, slave, mnopts=None ):
         """
         Starts a shell used by the node to run commands. If inNamespace=True,
         then a shell is started in a network namespace. Otherwise it just starts

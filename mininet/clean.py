@@ -42,7 +42,7 @@ def killprocs( pidsFunc, pattern ):
     sh( 'pkill -9 -f %s' % pattern )
     # Make sure they are gone
     while True:
-        pids = pidsFn( pattern )
+        pids = pidsFunc( pattern )
         if pids:
             sh( 'pkill -9 -f %s' % pattern )
             time.sleep( .5 )
