@@ -95,7 +95,9 @@ This is primarily a performance improvement and bug fix release.
 
 ### Installation
 
-See `INSTALL` for installation instructions and details.
+If you are using a Linux, see `INSTALL` for installation instructions and
+details. If you are using FreeBSD, see `INSTALL.FreeBSD`.
+
 
 ### Documentation
 

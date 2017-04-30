@@ -131,8 +131,6 @@ class IfBridge( Switch ):
             modprobe( 'if_bridge' )
 
 
-NAT = IpfwNAT if uname()[ 0 ] == 'FreeBSD' else IptablesNAT
-
 class IptablesNAT( Node ):
     "NAT: Provides connectivity to external network"
 
@@ -289,3 +287,5 @@ class IpfwNAT( Node ):
             modprobe( 'ipfw' )
         if 'ipfw_nat.ko' not in klds:
             modprobe( 'ipfw_nat' )
+
+NAT = IpfwNAT if uname()[ 0 ] == 'FreeBSD' else IptablesNAT

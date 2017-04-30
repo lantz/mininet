@@ -1,6 +1,4 @@
 """
-A collection of objects implementing platform-specifics for FreeBSD.
-
 Node: jail(2) based node. This currently requires a kernel capable of VIMAGE
 resource virtualization.
 
@@ -155,34 +153,3 @@ class Node( BaseNode ):
             params = intf.IP()
         # Do this in one line in case we're messing with the root namespace
         self.cmd( 'route del default; route add default %s' % params )
-
-
-class Intf( BaseIntf ):
-    """Interface objects that use 'ifconfig' to configure the underlying
-    interface that it represents"""
-
-    def setMAC( self, macstr ):
-        self.mac = macstr
-        return ( self.ifconfig( 'down' ) +
-                 self.ifconfig( 'ether', macstr, 'up' ) )
-
-    def rename( self, newname ):
-        "Rename interface"
-        result = self.ifconfig( 'name', newname )
-        self.name = newname
-        return result
-
-    def delete( self ):
-        "Delete interface"
-        jopt = '-vnet ' + self.node.jid if self.node.jid else ''
-        self.ifconfig( jopt, 'destroy' )
-        self.node.delIntf( self )
-        self.link = None
-
-    def status( self ):
-        "Return intf status as a string"
-        links, _err, _result = self.node.pexec( 'ifconfig -l' )
-        if self.name in links:
-            return "OK"
-        else:
-            return "MISSING"

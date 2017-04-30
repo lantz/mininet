@@ -5,9 +5,9 @@ from mininet.log import info, error, debug
 from os import environ, uname
 
 if uname()[ 0 ] == 'FreeBSD':
-    from mininet.util_freebsd import ( lsmod, rmmod, modprobe )
+    from mininet.freebsd.util import ( lsmod, rmmod, modprobe )
 else:
-    from mininet.util_linux import ( lsmod, rmmod, modprobe )
+    from mininet.linux.util import ( lsmod, rmmod, modprobe )
 
 OF_KMOD = 'ofdatapath'
 OVS_KMOD = 'openvswitch_mod'  # Renamed 'openvswitch' in OVS 1.7+/Linux 3.5+

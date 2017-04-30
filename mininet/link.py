@@ -26,13 +26,13 @@ Link: basic link class for creating veth pairs
 from os import uname
 
 if uname()[ 0 ] == 'FreeBSD':
-    from mininet.libfreebsd import Intf
+    from mininet.freebsd.intf import Intf
+    from mininet.freebsd.util import makeIntfPair
 else:
-    from mininet.liblinux import Intf
+    from mininet.linux.intf import Intf
+    from mininet.linux.util import makeIntfPair
 
 from mininet.log import info, error, debug
-from mininet.util import makeIntfPair
-
 
 class TCIntf( Intf ):
     """Interface customized by tc (traffic control) utility

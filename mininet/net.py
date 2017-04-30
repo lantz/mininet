@@ -97,11 +97,13 @@ from itertools import chain, groupby
 from math import ceil
 
 if os.uname()[ 0 ] == 'FreeBSD':
-    from mininet.libfreebsd import Node, Intf
-    from mininet.util_freebsd import fixLimits, numCores
+    from mininet.freebsd.node import Node
+    from mininet.freebsd.intf import Intf
+    from mininet.freebsd.util import fixLimits, numCores
 else:
-    from mininet.liblinux import Node, Intf
-    from mininet.util_freebsd import fixLimits, numCores
+    from mininet.linux.node import Node
+    from mininet.linux.intf import Intf
+    from mininet.linux.util import fixLimits, numCores
 
 from mininet.cli import CLI
 from mininet.log import info, error, debug, output, warn
