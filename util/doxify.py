@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 """
 Convert simple documentation to epydoc/pydoctor-compatible markup
