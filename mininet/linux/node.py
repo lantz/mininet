@@ -7,6 +7,9 @@ Links are veth device pairs (see ip link(8)).
 This is a collection of helpers that call the right commands to manipulate these
 components.
 """
+import signal
+from os import killpg
+
 from subprocess import PIPE, Popen
 from mininet.util import quietRun
 
@@ -67,7 +70,7 @@ class Node( BaseNode ):
         self.unmountPrivateDirs()
         if self.shell:
             if self.shell.poll() is None:
-                os.killpg( self.shell.pid, signal.SIGHUP )
+                killpg( self.shell.pid, signal.SIGHUP )
         self.cleanup()
 
     def popen( self, *args, **kwargs ):
@@ -122,39 +125,3 @@ class Node( BaseNode ):
         self.cmd( 'route del default; route add default %s' % params )
 
 
-class Intf( BaseIntf ):
-    """Interface objects that use 'ip' and 'ifconfig' to configure the
-    underlying interface that it represents"""
-
-    def setMAC( self, macstr ):
-        self.mac = macstr
-        return ( self.ifconfig( 'down' ) +
-                 self.ifconfig( 'hw', 'ether', macstr ) +
-                 self.ifconfig( 'up' ) )
-
-    def rename( self, newname ):
-        "Rename interface"
-        self.ifconfig( 'down' )
-        result = self.cmd( 'ip link set', self.name, 'name', newname )
-        self.name = newname
-        self.ifconfig( 'up' )
-
-    def delete( self ):
-        "Delete interface"
-        self.cmd( 'ip link del ' + self.name )
-        # We used to do this, but it slows us down:
-        # if self.node.inNamespace:
-        # Link may have been dumped into root NS
-        # quietRun( 'ip link del ' + self.name )
-        self.node.delIntf( self )
-        self.link = None
-
-        return result
-
-    def status( self ):
-        "Return intf status as a string"
-        links, _err, _result = self.node.pexec( 'ip link show' )
-        if self.name in links:
-            return "OK"
-        else:
-            return "MISSING"

@@ -5,7 +5,6 @@ the lightweight virtualization needed to implement hosts and switches.
 import os
 import pty
 import re
-import signal
 import select
 from subprocess import Popen, PIPE
 

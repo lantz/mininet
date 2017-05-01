@@ -8,6 +8,9 @@ virtualization (see vnet(9)). Links are created by epair(4)s.
 This is a collection of helpers that call the right commands to manipulate these
 components.
 """
+import signal
+from os import killpg
+
 from subprocess import PIPE, Popen
 from mininet.basenode import BaseNode
 from mininet.util import quietRun
@@ -17,7 +20,6 @@ class Node( BaseNode ):
 
     def __init__( self, name, inNamespace=True, **params ):
         BaseNode.__init__( self, name, inNamespace, **params )
-        self.jid = None                                             # string
 
     def getShell( self, master, slave, mnopts=None ):
         """
@@ -44,6 +46,8 @@ class Node( BaseNode ):
             except ValueError:
                 error( "%s: could not create a jail\n" % self.name )
                 return
+        else:
+            self.jid = None
 
         # bash -i: force interactive
         # -s: pass $* to shell, and make process easy to find in ps outside of
@@ -83,7 +87,7 @@ class Node( BaseNode ):
             else:
                 quietRun( 'umount %s' % directory + self.name )
 
-    def teardown( self ):
+    def terminate( self ):
         """
         Cleanup when node is killed. THis involves explicitly killing any
         processes in the jail, as stop.timeout seems to be ignored
@@ -95,7 +99,7 @@ class Node( BaseNode ):
             quietRun( 'jail -r ' + self.jid )
         if self.shell:
             if self.shell.poll() is None:
-                os.killpg( self.shell.pid, signal.SIGHUP )
+                killpg( self.shell.pid, signal.SIGHUP )
         self.cleanup()
 
     def popen( self, *args, **kwargs ):
