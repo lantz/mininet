@@ -1003,12 +1003,19 @@ class NOX( Controller ):
 
 class Ryu( Controller ):
     "Controller to run Ryu application"
+
     def __init__( self, name, *ryuArgs, **kwargs ):
         """Init.
         name: name to give controller.
         ryuArgs: arguments and modules to pass to Ryu"""
-        homeDir = quietRun( 'printenv HOME' ).strip( '\r\n' )
-        ryuCoreDir = '%s/ryu/ryu/app/' % homeDir
+
+        if os.uname()[ 0 ] == 'FreeBSD':
+            import site
+            homeDir = site.getsitepackages()[ 0 ]
+        else:
+            homeDir = quietRun( 'printenv HOME' ).strip( '\r\n' ) + '/ryu'
+
+        ryuCoreDir = '%s/ryu/app/' % homeDir
         if not ryuArgs:
             warn( 'warning: no Ryu modules specified; '
                   'running simple_switch only\n' )
