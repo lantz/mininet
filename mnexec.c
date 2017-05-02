@@ -46,13 +46,14 @@ void usage(char *name)
            "  -c: close all file descriptors except stdin/out/error\n"
            "  -d: detach from tty by calling setsid()\n"
            "  -p: print ^A + pid\n"
-           "  -v: print version\n",
+           "  -v: print version\n"
 #ifdef __linux__
            "  -n: run in new network and mount namespaces\n"
            "  -a pid: attach to pid's network and mount namespaces\n"
            "  -g group: add to cgroup\n"
            "  -r rtprio: run with SCHED_RR (usually requires -g)\n"
 #endif
+           ,
            name);
 }
 

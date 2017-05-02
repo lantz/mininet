@@ -12,6 +12,7 @@ from os import killpg
 
 from subprocess import PIPE, Popen
 from mininet.util import quietRun
+from mininet.basenode import BaseNode
 
 class Node( BaseNode ):
     """A virtual network node that manipulates and tracks namespaces."""

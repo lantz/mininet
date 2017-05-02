@@ -31,8 +31,6 @@ class Intf( BaseIntf ):
         self.node.delIntf( self )
         self.link = None
 
-        return result
-
     def status( self ):
         "Return intf status as a string"
         links, _err, _result = self.node.pexec( 'ip link show' )
