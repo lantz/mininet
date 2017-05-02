@@ -129,6 +129,7 @@ like to contribute an installation script, we would welcome it!)
     * install Mininet, the OpenFlow reference implementation, and
       Open vSwitch
 
+        ./configure
         util/install.sh -fnv
 
     * enable and start openvswitch

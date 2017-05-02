@@ -33,15 +33,21 @@ Open vSwitch, and Ryu along with their dependencies:
 
     cd mininet
     ./configure
-    sudo util/install.sh  #or with flags -nvy
+    sudo util/install.sh -a #or with flags -nvy
 
 The script uses `pkg` to install the dependencies, so this should take just a
 minute or so (plus or minus confirming installation, and network speed).
 
-Next, start Open vSwitch:
+Next, start Open vSwitch (if not started):
 
     sudo service ovsdb-server onestart
     sudo service ovs-vswitchd onestart
+
+The following lines can be added to /etc/rc.conf so that they start with
+system startup/restart:
+
+    ovsdb_server_enable="YES"
+    ovs_vswitchd_enable="YES"
 
 Finally, test the installation:
 
@@ -58,5 +64,6 @@ similar sanity check with less waiting:
 
 The Mininet core files can be uninstalled with the same install script:
 
-    sudo util/install-fbsd.sh -u
+    sudo util/install.sh -u
 
+This essentially undoes `install.sh -n`.

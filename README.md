@@ -108,6 +108,9 @@ to the Python API, is available on the
 There is also a wiki which you are encouraged to read and to
 contribute to, particularly the Frequently Asked Questions (FAQ.)
 
+Details about FreeBSD support are available on the 
+[FreeBSD wiki Mininet page](https://wiki.freebsd.org/Mininet).
+
 ### Support
 
 Mininet is community-supported. We encourage you to join the
