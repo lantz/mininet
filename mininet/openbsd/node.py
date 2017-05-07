@@ -1,9 +1,10 @@
 """
-Node: jail(2) based node. This currently requires a kernel capable of VIMAGE
-resource virtualization.
+Node: rdomain(4) based node. This is somewhat more similar to Linux's network
+namespace moreso than a jail since it creates a separate network address space
+only.
 
-Mininet 'hosts' are created by running shells within jails with network
-virtualization (see vnet(9)). Links are created by epair(4)s.
+Mininet 'hosts' are created by running shells within rdomains. Links are made of
+pair(4)s patched together.
 
 This is a collection of helpers that call the right commands to manipulate these
 components.
@@ -16,7 +17,11 @@ from mininet.basenode import BaseNode
 from mininet.util import quietRun
 
 class Node( BaseNode ):
-    """A virtual network node that manipulates and tracks jails."""
+    """A virtual network node that manipulates and tracks rdomains. Because of
+       the property of rdomains, an OpenBSD node will always come with at least
+       one interface if inNamespace=True."""
+
+    index=0     # rdomain ID, can only go to 255
 
     def __init__( self, name, inNamespace=True, **params ):
         BaseNode.__init__( self, name, inNamespace, **params )
@@ -24,35 +29,27 @@ class Node( BaseNode ):
     def getShell( self, master, slave, mnopts=None ):
         """
         Starts a shell used by the node to run commands. If inNamespace=True,
-        this is a two-stage process where a persistent vnet jail is started,
-        then a shell is started within the jail. Otherwise it just starts a
-        shell.
+        a pair interface is created, assigned to an rdomain, and a shell is
+        exec'd in the rdomain.
         """
-        execcmd = 'mnexec'
+        execcmd = [ 'mnexec' ]
         opts = '-cd' if mnopts is None else mnopts
 
-        # -ci               : create, then output just the JID; 
-        # vnet              : with virtual network stack; 
-        # allow.raw_sockets : enable raw socket creation;
-        # stop.timeout=0    : don't wait for a process to exit in a jail
-
         if self.inNamespace:
-            cmd = [ 'jail', '-ci', 'vnet', 'allow.raw_sockets', 'persist',
-                    'stop.timeout=0', 'name=mininet:' + self.name, 'path=/' ]
-            ret = int( Popen( cmd, stdout=PIPE ).communicate()[ 0 ][ :-1 ] )
-            try:
-                execcmd = 'jexec'
-                opts = self.jid = str( ret )
-            except ValueError:
-                error( "%s: could not create a jail\n" % self.name )
-                return
+            # create the pair tied to an rdomain
+            self.pair, self.rdid = 'pair%d' % Intf.next(), Node.index
+            Node.index += 1
+            rcmd = [ 'ifconfig', self.pair, 'create', 'rdomain %d' % self.rdid ]
+            execcmd = [ 'route', '-T%d' % self.rdid, 'exec' ] + execcmd
+            Popen( rcmd, stdout=PIPE )
         else:
-            self.jid = None
+            self.pair = None
+            self.rdid = None
 
         # bash -i: force interactive
         # -s: pass $* to shell, and make process easy to find in ps outside of
         # a jail. prompt is set to sentinel chr( 127 )
-        cmd = [ execcmd, opts, 'env', 'PS1=' + chr( 127 ),
+        cmd = execcmd + [ opts, 'env', 'PS1=' + chr( 127 ),
                 'bash', '--norc', '-is', 'mininet:' + self.name ]
 
         return Popen( cmd, stdin=slave, stdout=slave, stderr=slave,
@@ -60,43 +57,43 @@ class Node( BaseNode ):
 
     def mountPrivateDirs( self ):
         "mount private directories"
+        # **Not applicable until further notice**
+        pass
         # Avoid expanding a string into a list of chars
-        assert not isinstance( self.privateDirs, basestring )
-        for directory in self.privateDirs:
-            if isinstance( directory, tuple ):
-                # mount given private directory onto mountpoint
-                mountPoint = directory[ 1 ] % self.__dict__
-                privateDir = directory[ 0 ]
-                diffDir = mountPoint + '_diff'
-                quietRun( 'mkdir -p %s %s %s' %
-                               ( privateDir, mountPoint, diffDir ) )
-                quietRun( 'mount -t nullfs %s %s' % ( privateDir, mountPoint ) )
-                quietRun( 'mount -t unionfs %s %s' % ( diffDir, mountPoint ) )
-            else:
-                # mount temporary filesystem on directory + name
-                quietRun( 'mkdir -p %s' % directory + self.name )
-                quietRun( 'mount -n -t tmpfs tmpfs %s' % directory + self.name )
+        #assert not isinstance( self.privateDirs, basestring )
+        #for directory in self.privateDirs:
+        #    if isinstance( directory, tuple ):
+        #        # mount given private directory onto mountpoint
+        #        mountPoint = directory[ 1 ] % self.__dict__
+        #        privateDir = directory[ 0 ]
+        #        diffDir = mountPoint + '_diff'
+        #        quietRun( 'mkdir -p %s %s %s' %
+        #                       ( privateDir, mountPoint, diffDir ) )
+        #        quietRun( 'mount -t nullfs %s %s' % ( privateDir, mountPoint ) )
+        #        quietRun( 'mount -t unionfs %s %s' % ( diffDir, mountPoint ) )
+        #    else:
+        #        # mount temporary filesystem on directory + name
+        #        quietRun( 'mkdir -p %s' % directory + self.name )
+        #        quietRun( 'mount -n -t tmpfs tmpfs %s' % directory + self.name )
 
     def unmountPrivateDirs( self ):
         "mount private directories -  overridden"
-        for directory in self.privateDirs:
-            # all ops are from prison0
-            if isinstance( directory, tuple ):
-                quietRun( 'umount %s' % directory[ 1 ] % self.__dict__ )
-                quietRun( 'umount %s' % directory[ 1 ] % self.__dict__ )
-            else:
-                quietRun( 'umount %s' % directory + self.name )
+        # **Not applicable until further notice**
+        pass
+        #for directory in self.privateDirs:
+        #    # all ops are from prison0
+        #    if isinstance( directory, tuple ):
+        #        quietRun( 'umount %s' % directory[ 1 ] % self.__dict__ )
+        #        quietRun( 'umount %s' % directory[ 1 ] % self.__dict__ )
+        #    else:
+        #        quietRun( 'umount %s' % directory + self.name )
 
     def terminate( self ):
         """
         Cleanup when node is killed. THis involves explicitly killing any
         processes in the jail, as stop.timeout seems to be ignored
         """
-        self.unmountPrivateDirs()
-        if self.jid:
-            # for when stop.timeout=0 doesn't work
-            quietRun( 'jexec ' + self.jid + ' pkill -9 bash' )
-            quietRun( 'jail -r ' + self.jid )
+        #self.unmountPrivateDirs()
         if self.shell:
             if self.shell.poll() is None:
                 killpg( self.shell.pid, signal.SIGHUP )
@@ -107,8 +104,7 @@ class Node( BaseNode ):
            args: Popen() args, single list, or string
            kwargs: Popen() keyword args"""
         defaults = { 'stdout': PIPE, 'stderr': PIPE,
-                     'mncmd':
-                     [ 'jexec', self.name ] if self.jid else [ 'mnexec', '-d' ] }
+                     'mncmd': [ 'mnexec', '-d' ] }
         defaults.update( kwargs )
         if len( args ) == 1:
             if isinstance( args[ 0 ], list ):
