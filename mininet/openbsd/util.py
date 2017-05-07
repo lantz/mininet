@@ -30,35 +30,38 @@ def makeIntfPair( intf1, intf2, addr1=None, addr2=None, node1=None, node2=None,
        node1: home node for interface 1 (optional)
        node2: home node for interface 2 (optional)
        deleteIntfs: delete intfs before creating them
-       runCmd: function to run shell commands (quietRun)
+       runCmd: function to run shell commands (quietRun) - ignored.
        raises Exception on failure"""
-    if not runCmd:
-        runCmd = quietRun
     if deleteIntfs:
         # Delete any old interfaces with the same names - want intf-node map?
         quietRun( deleteCmd( intf1, node1 ) )
         quietRun( deleteCmd( intf2, node2 ) )
-    # Create new pair(4)s
-    out = quietRun( 'ifconfig pair' + Intf.next() + ' create' )
-    out = quietRun( 'ifconfig pair' + Intf.next() + ' create' )
 
-    # doas ifconfig pair4 create lladdr fe:e1:ba:d4:ee:58 rdomain 1 up
-    quietRun( 'ifconfig %s link %s name %s' % ( end1, addr1, intf1 ) )
-    quietRun( 'ifconfig %s link %s name %s' % ( end2, addr2, intf2 ) )
-
-    # Move interfaces if necessary i.e. ends are specified
+    # If there are nodes, and they are not 'in namespaces', create pairs for
+    # them and patch it to a node's.
+    pair1 = pair%d' % Intf.next()
+    pair2 = pair%d' % Intf.next()
+    cmd1 = 'ifconfig ' + pair1 + ' create'
+    cmd2 = 'ifconfig ' + pair2 + ' create'
     if node1 and node1.rdomain:
-        out1 = moveIntfNoRetry( intf1, node1 )
-        if not ( out1 ):
-            raise Exception( 'Failed to move %s to %s', intf1, node1 )
+        cmd1 += ' rdomain %d' % node1.rdid
     if node2 and node2.rdomain:
-        out2 = moveIntfNoRetry( intf2, node2 )
-        if not ( out2 ):
-            raise Exception( 'Failed to move %s to %s', intf2, node2 )
+        cmd2 += ' rdomain %d' % node2.rdid
+    if addr1:
+        cmd1 += ' lladdr ' + addr1
+    if addr2:
+        cmd2 += ' lladdr ' + addr2
+
+    # make one end, then patch the other onto it to form a link
+    quietRun( cmd1 + ' up' )
+    quietRun( cmd2 + ' patch ' + pair1 + ' up' )
 
 def deleteCmd( intf, node=None ):
     """Command to destroy an interface. If only intf is specified, assume that
-       it's in the host."""
+       it's in the host and is the true name of the intf."""
+    if 'pair' in intf.name and node:
+        ifobj = node.nameToIntf.get( intf )
+        intf = ifObj.realName() if ifObj else intf
     return 'ifconfig %s %s destroy' % ( intf, opts if opts else '' )
 
 def moveIntfNoRetry( intf, dstNode, printError=False ):
@@ -67,7 +70,10 @@ def moveIntfNoRetry( intf, dstNode, printError=False ):
         dstNode: destination Node
         printError: if true, print error"""
     intf = str( intf )
-    cmd = 'ifconfig %s vnet %s' % ( intf, dstNode.jid )
+    # get the real name of this intf
+    if 'pair' not in intf:
+        intf = dstNode.portNames[ intf ]
+    cmd = 'ifconfig %s rdomain %s up' % ( intf, dstNode.rdid )
     cmdOutput = quietRun( cmd )
     # If command does not produce any output, then we can assume
     # that the interface has been moved successfully.

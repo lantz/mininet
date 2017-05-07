@@ -215,7 +215,7 @@ class TCIntf( Intf ):
 
 class Link( object ):
 
-    """A basic link is just a veth pair.
+    """A basic link is just a virtual ethernet pair.
        Other types of links could be tunnels, link emulators, etc.."""
 
     # pylint: disable=too-many-branches

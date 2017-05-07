@@ -21,12 +21,14 @@ class Intf( BaseIntf ):
     def rename( self, newname ):
         "Rename interface. We retain the real name of the interface as
          self.realname since interfaces can't be renamed."
+        self.node.portNames[ newname ] = self.name
         self.realname = self.name
         self.name = newname
         return newname
 
     def delete( self ):
         "Delete interface"
+        del self.node.portNames[ self.name ]
         self.node.delIntf( self )
         self.link = None
 

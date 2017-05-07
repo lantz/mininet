@@ -19,12 +19,14 @@ from mininet.util import quietRun
 class Node( BaseNode ):
     """A virtual network node that manipulates and tracks rdomains. Because of
        the property of rdomains, an OpenBSD node will always come with at least
-       one interface if inNamespace=True."""
+       one pair interface if inNamespace=True."""
 
     index=0     # rdomain ID, can only go to 255
 
     def __init__( self, name, inNamespace=True, **params ):
         BaseNode.__init__( self, name, inNamespace, **params )
+        # No renaming, supply map of assigned interface names to real names
+        self.portNames = {}
 
     def getShell( self, master, slave, mnopts=None ):
         """
