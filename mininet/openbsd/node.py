@@ -16,6 +16,8 @@ from subprocess import PIPE, Popen
 from mininet.basenode import BaseNode
 from mininet.util import quietRun
 
+from mininet.openbsd.util import moveIntf
+
 class Node( BaseNode ):
     """A virtual network node that manipulates and tracks rdomains. Because of
        the property of rdomains, an OpenBSD node will always come with at least
@@ -49,10 +51,10 @@ class Node( BaseNode ):
             self.rdid = None
 
         # bash -i: force interactive
-        # -s: pass $* to shell, and make process easy to find in ps outside of
-        # a jail. prompt is set to sentinel chr( 127 )
-        cmd = execcmd + [ opts, 'env', 'PS1=' + chr( 127 ),
-                'bash', '--norc', '-is', 'mininet:' + self.name ]
+        # -s: pass $* to shell, and make process easy to find in ps. The prompt
+        # is set to sentinel chr( 127 )
+        cmd = execcmd + [ opts, 'env', 'PS1=' + chr( 127 ), '/bin/sh', '-is',
+                          'mininet:' + self.name ]
 
         return Popen( cmd, stdin=slave, stdout=slave, stderr=slave,
                       close_fds=False )
@@ -91,10 +93,7 @@ class Node( BaseNode ):
         #        quietRun( 'umount %s' % directory + self.name )
 
     def terminate( self ):
-        """
-        Cleanup when node is killed. THis involves explicitly killing any
-        processes in the jail, as stop.timeout seems to be ignored
-        """
+        """ Cleanup when node is killed.  """
         #self.unmountPrivateDirs()
         if self.shell:
             if self.shell.poll() is None:
@@ -154,3 +153,8 @@ class Node( BaseNode ):
         else:
             params = intf.IP()
         self.cmd( 'route change default %s' % params )
+
+
+    def addIntf( self, intf, port=None, moveIntfFn=moveIntf ):
+        self.portNames[ intf.name ] = intf.realName
+        super( Node, self ).addIntf( intf, port, moveIntfFn )

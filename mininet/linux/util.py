@@ -59,6 +59,9 @@ def makeIntfPair( intf1, intf2, addr1=None, addr2=None, node1=None, node2=None,
         raise Exception( "Error creating interface pair (%s,%s): %s " %
                          ( intf1, intf2, cmdOutput ) )
 
+    return intf1, intf2
+
+
 def deleteCmd( intf, node=None ):
     """Command to destroy an interface."""
     return 'ip link del ' + intf

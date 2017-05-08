@@ -64,6 +64,8 @@ def makeIntfPair( intf1, intf2, addr1=None, addr2=None, node1=None, node2=None,
         if not ( out2 ):
             raise Exception( 'Failed to move %s to %s', intf2, node2 )
 
+    return end1, end2
+
 def deleteCmd( intf, node=None ):
     """Command to destroy an interface. If only intf is specified, assume that
        it's in the host."""

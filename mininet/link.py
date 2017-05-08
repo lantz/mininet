@@ -261,10 +261,14 @@ class Link( object ):
         if fast:
             params1.setdefault( 'moveIntfFn', self._ignore )
             params2.setdefault( 'moveIntfFn', self._ignore )
-            self.makeIntfPair( intfName1, intfName2, addr1, addr2,
-                               node1, node2, deleteIntfs=False )
+            p1, p2 = self.makeIntfPair( intfName1, intfName2, addr1,
+                                        addr2, node1, node2,
+                                        deleteIntfs=False )
         else:
-            self.makeIntfPair( intfName1, intfName2, addr1, addr2 )
+            p1, p2 = self.makeIntfPair( intfName1, intfName2, addr1, addr2 )
+        # Original names of interfaces, if any, and new name are different
+        # This is useful in cases where interface renaming isn't supported.
+        params1[ 'orgName' ], params2[ 'orgName' ] = p1, p2
 
         if not cls1:
             cls1 = intf

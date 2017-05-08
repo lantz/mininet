@@ -9,7 +9,7 @@ import re
 class BaseIntf( object ):
     """Basic interface object that can configure itself."""
 
-    def __init__( self, name, node=None, port=None, link=None,
+    def __init__( self, name, node, port=None, link=None,
                   mac=None, **params ):
         """name: interface name (e.g. h1-eth0)
            node: owning node (where this intf most likely lives)

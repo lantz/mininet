@@ -10,6 +10,11 @@ class Intf( BaseIntf ):
 
     index=0    # pair(4) index
 
+    def __init__( self, name, node=None, port=None, link=None,
+                  mac=None, **params ):
+        BaseIntf.__init__( self, name, node, port, link, mac, **params )
+        self.realName = params[ 'orgName' ]
+
     def ifconfig( self, *args ):
         "Configure ourselves using ifconfig"
         return self.cmd( 'ifconfig', self.realName(), *args )
@@ -21,14 +26,16 @@ class Intf( BaseIntf ):
     def rename( self, newname ):
         "Rename interface. We retain the real name of the interface as
          self.realname since interfaces can't be renamed."
-        self.node.portNames[ newname ] = self.name
-        self.realname = self.name
+        if self.name in self.node.portNames:
+            del self.node.portNames[ self.name ]
+        self.node.portNames[ newname ] = self.realName
         self.name = newname
         return newname
 
     def delete( self ):
         "Delete interface"
-        del self.node.portNames[ self.name ]
+        if self.name in self.node.portNames:
+            del self.node.portNames[ self.name ]
         self.node.delIntf( self )
         self.link = None
 
@@ -43,7 +50,7 @@ class Intf( BaseIntf ):
     def realName( self ):
         "We pretend that the interface name has changed, but retain
          the real name so we can actually configure the interface"
-        return self.realname if self.realname else self.name
+        return self.realname
 
     @classmethod
     def next( cls ):

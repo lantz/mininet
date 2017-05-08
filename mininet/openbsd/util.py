@@ -56,13 +56,16 @@ def makeIntfPair( intf1, intf2, addr1=None, addr2=None, node1=None, node2=None,
     quietRun( cmd1 + ' up' )
     quietRun( cmd2 + ' patch ' + pair1 + ' up' )
 
+    return pair1, pair2
+
+
 def deleteCmd( intf, node=None ):
     """Command to destroy an interface. If only intf is specified, assume that
        it's in the host and is the true name of the intf."""
-    if 'pair' in intf.name and node:
+    if 'pair' not in intf and node:
         ifobj = node.nameToIntf.get( intf )
-        intf = ifObj.realName() if ifObj else intf
-    return 'ifconfig %s %s destroy' % ( intf, opts if opts else '' )
+        intf = ifobj.realName() if ifobj else intf
+    return 'ifconfig ' + intf + ' destroy'
 
 def moveIntfNoRetry( intf, dstNode, printError=False ):
     """Move interface to node from host/root space, without retrying.

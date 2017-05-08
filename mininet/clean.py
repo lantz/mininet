@@ -57,7 +57,7 @@ def killnodes( pidsFunc, pattern='[m]ininet' ):
         if 'mininet:' in node:
             sh( 'jail -r %s 2>/dev/null' % node )
 
-def _iplinkClean():
+def _iplinkClean( listCmd=None ):
     """ link cleanup using 'ip link' """
     links = sh( "ip link show | "
                 "egrep -o '([-_.[:alnum:]]+-eth[[:digit:]]+)'"
@@ -73,11 +73,9 @@ def _iplinkClean():
         info( "*** Removing tap9 - assuming it's from cluster edition\n" )
         sh( 'ip link del tap9' )
 
-def _ifconfigClean():
+def _ifconfigClean( listCmd ):
     """ link cleanup with 'ifconfig'"""
-    links = sh( "ifconfig -l | "
-                "egrep -o '([-_.[:alnum:]]+-eth[[:digit:]]+)'"
-                ).splitlines()
+    links = sh( listCmd ).splitlines()
     # Delete blocks of links
     n = 1000  # chunk size
     for i in range( 0, len( links ), n ):
@@ -89,13 +87,19 @@ def _ifconfigClean():
         info( "*** Removing tap9 - assuming it's from cluster edition\n" )
         sh( 'ifconfig tap9 destroy' )
 
-if uname()[ 0 ] == 'FreeBSD':
-    cleanLinks = _ifconfigClean
-    pidsFunc = _popenPids
+platform = uname()[ 0 ]
+if platform == 'FreeBSD':
+    cleanLinks = _ifcfgClean
+    args       = "ifconfig -l | egrep -o '([-_.[:alnum:]]+-eth[[:digit:]]+)'"
+    pidsFunc   = _popenPids
     cleanNodes = killnodes
+elif platform == 'Linux':
+    cleanLinks, args = _iplinkClean, None
+    pidsFunc   = _coPids
+    cleanNodes = killprocs
 else:
-    cleanLinks = _iplinkClean
-    pidsFunc = _coPids
+    cleanLinks, args = _ifcfgClean, "ifconfig pair | egrep -o '^pair[[:digit:]]+'"
+    pidsFunc   = _coPids
     cleanNodes = killprocs
 
 class Cleanup( object ):
@@ -148,7 +152,7 @@ class Cleanup( object ):
             sh( 'ovs-vsctl del-br ' + dp )
 
         info( "*** Removing all links of the pattern foo-ethX\n" )
-        cleanLinks()
+        cleanLinks( args )
 
         info( "*** Killing stale mininet node processes\n" )
         cleanNodes( pidsFunc, '[m]ininet:' )
