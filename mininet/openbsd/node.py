@@ -17,13 +17,14 @@ from mininet.basenode import BaseNode
 from mininet.util import quietRun
 
 from mininet.openbsd.util import moveIntf
+from mininet.openbsd.intf import Intf
 
 class Node( BaseNode ):
     """A virtual network node that manipulates and tracks rdomains. Because of
        the property of rdomains, an OpenBSD node will always come with at least
        one pair interface if inNamespace=True."""
 
-    index=0     # rdomain ID, can only go to 255
+    index=1     # rdomain ID, can only go to 255
 
     def __init__( self, name, inNamespace=True, **params ):
         BaseNode.__init__( self, name, inNamespace, **params )

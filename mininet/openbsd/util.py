@@ -39,8 +39,8 @@ def makeIntfPair( intf1, intf2, addr1=None, addr2=None, node1=None, node2=None,
 
     # If there are nodes, and they are not 'in namespaces', create pairs for
     # them and patch it to a node's.
-    pair1 = pair%d' % Intf.next()
-    pair2 = pair%d' % Intf.next()
+    pair1 = 'pair%d' % Intf.next()
+    pair2 = 'pair%d' % Intf.next()
     cmd1 = 'ifconfig ' + pair1 + ' create'
     cmd2 = 'ifconfig ' + pair2 + ' create'
     if node1 and node1.rdomain:

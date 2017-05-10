@@ -8,10 +8,13 @@ import re
 import select
 from subprocess import Popen, PIPE
 
-if os.uname()[ 0 ] == 'FreeBSD':
+plat = os.uname()[ 0 ]
+if plat == 'FreeBSD':
     from mininet.freebsd.util import LO, moveIntf
-else:
+elif plat == 'Linux':
     from mininet.linux.util import LO, moveIntf
+else:
+    from mininet.openbsd.util import LO, moveIntf
 
 from mininet.log import info, error, warn, debug
 from mininet.util import ( quietRun, isShellBuiltin )

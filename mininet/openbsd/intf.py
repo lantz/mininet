@@ -24,8 +24,10 @@ class Intf( BaseIntf ):
         return ( self.ifconfig( 'lladdr', macstr ) )
 
     def rename( self, newname ):
-        "Rename interface. We retain the real name of the interface as
-         self.realname since interfaces can't be renamed."
+        """
+        Rename interface. We retain the real name of the interface as
+        self.realname since interfaces can't be renamed.
+        """
         if self.name in self.node.portNames:
             del self.node.portNames[ self.name ]
         self.node.portNames[ newname ] = self.realName
@@ -48,8 +50,10 @@ class Intf( BaseIntf ):
             return "MISSING"
 
     def realName( self ):
-        "We pretend that the interface name has changed, but retain
-         the real name so we can actually configure the interface"
+        """
+        Pretend that the interface name has changed, but retain
+        the real name so we can actually configure the interface
+        """
         return self.realname
 
     @classmethod

@@ -25,12 +25,16 @@ Link: basic link class for creating veth pairs
 """
 from os import uname
 
-if uname()[ 0 ] == 'FreeBSD':
+plat = uname()[ 0 ]
+if plat == 'FreeBSD':
     from mininet.freebsd.intf import Intf
     from mininet.freebsd.util import makeIntfPair
-else:
+elif plat == 'Linux':
     from mininet.linux.intf import Intf
     from mininet.linux.util import makeIntfPair
+else:
+    from mininet.openbsd.intf import Intf
+    from mininet.openbsd.util import makeIntfPair
 
 from mininet.log import info, error, debug
 
