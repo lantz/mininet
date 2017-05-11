@@ -39,13 +39,9 @@ class Node( BaseNode ):
         if self.inNamespace:
             cmd = [ 'jail', '-ci', 'vnet', 'allow.raw_sockets', 'persist',
                     'stop.timeout=0', 'name=mininet:' + self.name, 'path=/' ]
-            ret = int( Popen( cmd, stdout=PIPE ).communicate()[ 0 ][ :-1 ] )
-            try:
-                execcmd = 'jexec'
-                opts = self.jid = str( ret )
-            except ValueError:
-                error( "%s: could not create a jail\n" % self.name )
-                return
+            ret = Popen( cmd, stdout=PIPE ).communicate()[ 0 ][ :-1 ]
+            execcmd = 'jexec'
+            opts = self.jid = ret
         else:
             self.jid = None
 

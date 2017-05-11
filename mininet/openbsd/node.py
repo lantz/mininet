@@ -44,7 +44,8 @@ class Node( BaseNode ):
             # create the pair tied to an rdomain
             self.pair, self.rdid = 'pair%d' % Intf.next(), Node.index
             Node.index += 1
-            rcmd = [ 'ifconfig', self.pair, 'create', 'rdomain %d' % self.rdid ]
+            rcmd = [ 'ifconfig', self.pair, 'create', 'rdomain',
+                     '%d' % self.rdid ]
             execcmd = [ 'route', '-T%d' % self.rdid, 'exec' ] + execcmd
             Popen( rcmd, stdout=PIPE )
         else:
