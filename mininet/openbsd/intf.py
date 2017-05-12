@@ -12,16 +12,21 @@ class Intf( BaseIntf ):
 
     def __init__( self, name, node=None, port=None, link=None,
                   mac=None, **params ):
-        BaseIntf.__init__( self, name, node, port, link, mac, **params )
-        self.realName = params[ 'orgName' ]
+        self.realname = params[ 'orgName' ]
+        BaseIntf.__init__( self, name, node=node, port=port, link=link,
+                           mac=mac, **params )
 
     def ifconfig( self, *args ):
         "Configure ourselves using ifconfig"
-        return self.cmd( 'ifconfig', self.realName(), *args )
+        o, err, ext = self.node.pexec( 'ifconfig', self.realname, *args )
+        if not err:
+            return o
+        return err
+
 
     def setMAC( self, macstr ):
         self.mac = macstr
-        return ( self.ifconfig( 'lladdr', macstr ) )
+        return self.ifconfig( 'lladdr', macstr )
 
     def rename( self, newname ):
         """
@@ -30,7 +35,7 @@ class Intf( BaseIntf ):
         """
         if self.name in self.node.portNames:
             del self.node.portNames[ self.name ]
-        self.node.portNames[ newname ] = self.realName
+        self.node.portNames[ newname ] = self.realname
         self.name = newname
         return newname
 
@@ -44,7 +49,7 @@ class Intf( BaseIntf ):
     def status( self ):
         "Return intf status as a string"
         links, _err, _result = self.node.pexec( 'ifconfig pair' )
-        if self.realName() + ':' in links:
+        if self.realname + ':' in links:
             return "OK"
         else:
             return "MISSING"

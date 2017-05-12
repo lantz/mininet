@@ -37,8 +37,8 @@ class Node( BaseNode ):
         a pair interface is created, assigned to an rdomain, and a shell is
         exec'd in the rdomain.
         """
-        execcmd = [ 'mnexec' ]
-        opts = '-cd' if mnopts is None else mnopts
+        #execcmd = [ 'mnexec' ]
+        #opts = '-cd' if mnopts is None else mnopts
 
         if self.inNamespace:
             # create the pair tied to an rdomain
@@ -46,7 +46,7 @@ class Node( BaseNode ):
             Node.index += 1
             rcmd = [ 'ifconfig', self.pair, 'create', 'rdomain',
                      '%d' % self.rdid ]
-            execcmd = [ 'route', '-T%d' % self.rdid, 'exec' ] + execcmd
+            #execcmd = [ 'route', '-T%d' % self.rdid, 'exec' ] + execcmd
             Popen( rcmd, stdout=PIPE )
         else:
             self.pair = None
@@ -55,11 +55,12 @@ class Node( BaseNode ):
         # bash -i: force interactive
         # -s: pass $* to shell, and make process easy to find in ps. The prompt
         # is set to sentinel chr( 127 )
-        cmd = execcmd + [ opts, 'env', 'PS1=' + chr( 127 ), '/bin/sh', '-is',
-                          'mininet:' + self.name ]
+        #cmd = execcmd + [ opts, 'env', 'PS1=' + chr( 127 ), '/bin/sh', '-is',
+        #                  'mininet:' + self.name ]
 
-        return Popen( cmd, stdin=slave, stdout=slave, stderr=slave,
-                      close_fds=False )
+        #return Popen( cmd, stdin=slave, stdout=slave, stderr=slave,
+        #              close_fds=False )
+        return None
 
     def mountPrivateDirs( self ):
         "mount private directories"
@@ -97,6 +98,7 @@ class Node( BaseNode ):
     def terminate( self ):
         """ Cleanup when node is killed.  """
         #self.unmountPrivateDirs()
+        Popen( [ 'ifconfig', self.pair, 'destroy' ] )
         if self.shell:
             if self.shell.poll() is None:
                 killpg( self.shell.pid, signal.SIGHUP )
@@ -107,7 +109,7 @@ class Node( BaseNode ):
            args: Popen() args, single list, or string
            kwargs: Popen() keyword args"""
         defaults = { 'stdout': PIPE, 'stderr': PIPE,
-                     'mncmd': [ 'mnexec', '-d' ] }
+                     'mncmd': [ 'route', '-T%d' % self.rdid, 'exec' ] }
         defaults.update( kwargs )
         if len( args ) == 1:
             if isinstance( args[ 0 ], list ):
@@ -139,7 +141,8 @@ class Node( BaseNode ):
            intf: string, interface name
            intfs: interface map of names to Intf"""
         # add stronger checks for interface lookup
-        self.cmd( 'route add -host %s %s' % ( ip, self.intfs( intf ).IP() ) )
+        cmd = 'route -T%s add -host %s %s'
+        quietRun( cmd % ( self.rdid, ip, self.intfs( intf ).IP() ) )
      
     def setDefaultRoute( self, intf=None ):
         """Set the default route to go through intf.
@@ -154,9 +157,9 @@ class Node( BaseNode ):
             params = argv[ -1 ]
         else:
             params = intf.IP()
-        self.cmd( 'route change default %s' % params )
+        quietRun( 'route -T%d change default %s' % ( self.rdid, params ) )
 
 
     def addIntf( self, intf, port=None, moveIntfFn=moveIntf ):
-        self.portNames[ intf.name ] = intf.realName
+        self.portNames[ intf.name ] = intf.realname
         super( Node, self ).addIntf( intf, port, moveIntfFn )

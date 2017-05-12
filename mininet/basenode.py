@@ -357,7 +357,7 @@ class BaseNode( object ):
         """
         if not intf:
             return self.defaultIntf()
-        elif isinstance( intf, basestring):
+        elif isinstance( intf, basestring ):
             return self.nameToIntf[ intf ]
         else:
             return intf

@@ -2,10 +2,12 @@
 OS-specific utility functions for OpenBSD, counterpart to util.py.
 """
 
-from mininet.log import output, error, warn, debug
 from resource import getrlimit, setrlimit, RLIMIT_NPROC, RLIMIT_NOFILE
+
+from mininet.log import output, error, warn, debug
 from mininet.util import ( quietRun, retry )
 
+from mininet.openbsd.intf import Intf
 
 LO='lo0'                       # loopback name.
 DP_MODE=None                   # no OVS (unless manually built?) 
@@ -43,9 +45,9 @@ def makeIntfPair( intf1, intf2, addr1=None, addr2=None, node1=None, node2=None,
     pair2 = 'pair%d' % Intf.next()
     cmd1 = 'ifconfig ' + pair1 + ' create'
     cmd2 = 'ifconfig ' + pair2 + ' create'
-    if node1 and node1.rdomain:
+    if node1 and node1.rdid:
         cmd1 += ' rdomain %d' % node1.rdid
-    if node2 and node2.rdomain:
+    if node2 and node2.rdid:
         cmd2 += ' rdomain %d' % node2.rdid
     if addr1:
         cmd1 += ' lladdr ' + addr1
