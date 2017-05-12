@@ -1691,7 +1691,7 @@ class MiniEdit( Frame ):
             f.write("from mininet.net import Mininet\n")
             f.write("from mininet.node import Controller, RemoteController, OVSController\n")
             f.write("from mininet.node import CPULimitedHost, Host, Node\n")
-            f.write("from mininet.node import OVSKernelSwitch, UserSwitch\n")
+            f.write("from mininet.node import KernelSwitch, UserSwitch\n")
             if StrictVersion(MININET_VERSION) > StrictVersion('2.0'):
                 f.write("from mininet.node import IVSSwitch\n")
             f.write("from mininet.cli import CLI\n")
@@ -1769,7 +1769,7 @@ class MiniEdit( Frame ):
                     f.write("    "+name+" = net.addHost('"+name+"', cls=Node, ip='0.0.0.0')\n")
                     f.write("    "+name+".cmd('sysctl -w net.ipv4.ip_forward=1')\n")
                 if 'LegacySwitch' in tags:
-                    f.write("    "+name+" = net.addSwitch('"+name+"', cls=OVSKernelSwitch, failMode='standalone')\n")
+                    f.write("    "+name+" = net.addSwitch('"+name+"', cls=KernelSwitch, failMode='standalone')\n")
                 if 'Switch' in tags:
                     opts = self.switchOpts[name]
                     nodeNum = opts['nodeNum']
@@ -1782,7 +1782,7 @@ class MiniEdit( Frame ):
                         elif self.appPrefs['switchType'] == 'userns':
                             f.write(", cls=UserSwitch, inNamespace=True")
                         else:
-                            f.write(", cls=OVSKernelSwitch")
+                            f.write(", cls=KernelSwitch")
                     elif opts['switchType'] == 'ivs':
                         f.write(", cls=IVSSwitch")
                     elif opts['switchType'] == 'user':
@@ -1790,7 +1790,7 @@ class MiniEdit( Frame ):
                     elif opts['switchType'] == 'userns':
                         f.write(", cls=UserSwitch, inNamespace=True")
                     else:
-                        f.write(", cls=OVSKernelSwitch")
+                        f.write(", cls=KernelSwitch")
                     if 'dpctl' in opts:
                         f.write(", listenPort="+opts['dpctl'])
                     if 'dpid' in opts:

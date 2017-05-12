@@ -112,7 +112,7 @@ else:
 
 from mininet.cli import CLI
 from mininet.log import info, error, debug, output, warn
-from mininet.node import ( Host, OVSKernelSwitch, DefaultController,
+from mininet.node import ( Host, KernelSwitch, DefaultController,
                            Controller, RctlHost )
 from mininet.nodelib import NAT
 from mininet.link import Link
@@ -127,7 +127,7 @@ VERSION = "2.3.0d1"
 class Mininet( object ):
     "Network emulation with hosts spawned in network namespaces."
 
-    def __init__( self, topo=None, switch=OVSKernelSwitch, host=Host,
+    def __init__( self, topo=None, switch=KernelSwitch, host=Host,
                   controller=DefaultController, link=Link, intf=Intf,
                   build=True, xterms=False, cleanup=False, ipBase='10.0.0.0/8',
                   inNamespace=False,

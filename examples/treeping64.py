@@ -4,7 +4,7 @@
 
 
 from mininet.log import setLogLevel, info
-from mininet.node import UserSwitch, OVSKernelSwitch  # , KernelSwitch
+from mininet.node import UserSwitch, KernelSwitch  # , KernelSwitch
 from mininet.topolib import TreeNet
 
 def treePing64():
@@ -13,7 +13,7 @@ def treePing64():
     results = {}
     switches = {  # 'reference kernel': KernelSwitch,
                   'reference user': UserSwitch,
-                  'Open vSwitch kernel': OVSKernelSwitch }
+                  'kernel': KernelSwitch }
 
     for name in switches:
         info( "*** Testing", name, "datapath\n" )

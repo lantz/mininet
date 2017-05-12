@@ -73,7 +73,7 @@ def _iplinkClean( listCmd=None ):
         info( "*** Removing tap9 - assuming it's from cluster edition\n" )
         sh( 'ip link del tap9' )
 
-def _ifconfigClean( listCmd ):
+def _ifcfgClean( listCmd ):
     """ link cleanup with 'ifconfig'"""
     links = sh( listCmd ).splitlines()
     # Delete blocks of links

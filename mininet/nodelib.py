@@ -130,6 +130,9 @@ class IfBridge( Switch ):
         if 'if_bridge' not in lsmod():
             modprobe( 'if_bridge' )
 
+class Bridge4( Switch ):
+    "OpenBSD bridge(4) Node (with optional spanning tree)."
+    pass
 
 class IptablesNAT( Node ):
     "NAT: Provides connectivity to external network"

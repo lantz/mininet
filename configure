@@ -14,6 +14,11 @@ case $OS in
         mandir=$prefix
         inst=$(pwd)/util/install-freebsd.sh
         ;;
+    *OpenBSD*)
+        prefix='/usr/local'
+        mandir='/usr/share'
+        inst=$(pwd)/util/install-openbsd.sh
+        ;;
     *)
         echo "Unknown platform: $OS"
         exit 1

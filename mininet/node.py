@@ -798,7 +798,14 @@ class OVSSwitch( Switch ):
         return switches
 
 
-OVSKernelSwitch = OVSSwitch
+class DevSwitch( Switch ):
+    """
+    OpenBSD switch device switch. Supported on OpenBSD 6.1+.
+    """
+    pass
+
+
+KernelSwitch = OVSSwitch if plat == 'Linux' else DevSwitch
 
 
 class OVSBridge( OVSSwitch ):
