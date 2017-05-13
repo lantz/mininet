@@ -163,3 +163,15 @@ class Node( BaseNode ):
     def addIntf( self, intf, port=None, moveIntfFn=moveIntf ):
         self.portNames[ intf.name ] = intf.realname
         super( Node, self ).addIntf( intf, port, moveIntfFn )
+
+    def cmd( self, *args, **kwargs ):
+        """Send a command, wait for output, and return it.
+           cmd: string"""
+        verbose = kwargs.get( 'verbose', False )
+        log, kwargs[ 'echo' ] = info, True if verbose else debug
+        log( '*** %s : %s\n' % ( self.name, args ) )
+        if self.rdid:
+            cmd = 'route -T%d exec ' % self.rdid + " ".join( args )
+            return quietRun( cmd, **kwargs )
+        else:
+            warn( '(%s exited - ignoring cmd%s)\n' % ( self, args ) )

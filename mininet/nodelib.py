@@ -130,9 +130,55 @@ class IfBridge( Switch ):
         if 'if_bridge' not in lsmod():
             modprobe( 'if_bridge' )
 
+
 class Bridge4( Switch ):
     "OpenBSD bridge(4) Node (with optional spanning tree)."
-    pass
+
+    unitNo = 0      # number following device name, e.g. 0 in bridge0
+
+    def __init__( self, name, stp=False, prio=None, **kwargs ):
+        """stp: use spanning tree protocol? (default False)
+           prio: optional explicit bridge priority for STP"""
+        self.stp = stp
+        if prio:
+            self.prio = prio # else automatically calculate, '-ifcost iface'
+        Switch.__init__( self, name, **kwargs )
+
+    def connected( self ):
+        "Are we forwarding yet?"
+        if self.stp:
+            return 'UP' in self.cmd( 'ifconfig', self.bname )
+        else:
+            return True
+
+    def start( self, _controllers ):
+        "Start bridge. Retain the bridge's name to save on ifconfig calls"
+        self.bname = 'bridge%d' % Bridge4.unitNo
+        Bridge4.unitNo += 1
+        quietRun( 'ifconfig %s create rdomain %s up' % ( self.bname, self.rdid ) )
+        addcmd, stpcmd = '', ''
+        for i in self.intfList():
+            if 'pair' in i.realname:
+                name = i.realname
+                addcmd += ' add ' + name
+                if self.stp:
+                    stpcmd += ' stp ' + name
+                    if self.prio:
+                        stpcmd += ' ifpriority %s %d ' % ( name, self.prio )
+                quietRun( 'ifconfig %s rdomain %s up' % ( name, self.rdid ) )
+        quietRun( 'ifconfig ' + self.bname + addcmd )
+
+    def stop( self, deleteIntfs=True ):
+        """Stop bridge
+           deleteIntfs: delete interfaces? (True)"""
+        quietRun( 'ifconfig %s destroy' % self.bname )
+        super( Bridge4, self ).stop( deleteIntfs )
+
+    def dpctl( self, *args ):
+        "Run brctl command"
+        # actually ifconfig
+        return quietRun( 'ifconfig', self.bname, *args )
+
 
 class IptablesNAT( Node ):
     "NAT: Provides connectivity to external network"
