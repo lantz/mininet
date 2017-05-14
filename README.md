@@ -6,9 +6,11 @@ Mininet 2.3.0d1
 
 [![Build Status][1]](https://travis-ci.org/mininet/mininet)
 
-*This is a heavily refactored version of Mininet that also supports FreeBSD,
-and is aimed to make it easier to add support for non-Linux systems. As
-such, the native install instructions are slightly different.*
+*This is a heavily refactored version of Mininet that also supports
+FreeBSD and OpenBSD, and is aimed to make it easier to add support for
+non-Linux systems. As such, the native install instructions are slightly
+different. This is also a heavy work-in-progress so things may be broken or
+unsupported.*
 
 ### What is Mininet?
 
@@ -96,7 +98,9 @@ This is primarily a performance improvement and bug fix release.
 ### Installation
 
 If you are using a Linux, see `INSTALL` for installation instructions and
-details. If you are using FreeBSD, see `INSTALL.FreeBSD`.
+details. If you are using FreeBSD, see `INSTALL.FreeBSD`. On OpenBSD,
+`./configure` followed by `./util/install.sh -a` should be all that's
+needed.
 
 
 ### Documentation
