@@ -179,7 +179,7 @@ class CgroupHost( Host ):
         quietRun( 'chrt -p %s %s' % ( self.rtprio, self.pid ) )
         result = quietRun( 'chrt -p %s' % self.pid )
         firstline = result.split( '\n' )[ 0 ]
-        lastword = firstline.split( ' ' )[ -1 ]
+        lastword = firstline.split()[ -1 ]
         if lastword != 'SCHED_RR':
             error( '*** error: could not assign SCHED_RR to %s\n' % self.name )
         return lastword

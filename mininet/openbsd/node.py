@@ -14,6 +14,7 @@ from os import killpg
 
 from subprocess import PIPE, Popen
 from mininet.basenode import BaseNode
+from mininet.log import debug, info, warn
 from mininet.util import quietRun
 
 from mininet.openbsd.util import moveIntf
@@ -109,7 +110,9 @@ class Node( BaseNode ):
            args: Popen() args, single list, or string
            kwargs: Popen() keyword args"""
         defaults = { 'stdout': PIPE, 'stderr': PIPE,
-                     'mncmd': [ 'route', '-T%d' % self.rdid, 'exec' ] }
+                     'mncmd':
+                     [ 'route', '-T%d' % self.rdid, 'exec' ] if self.rdid else
+                     [ 'mnexec', '-d' ] }
         defaults.update( kwargs )
         if len( args ) == 1:
             if isinstance( args[ 0 ], list ):

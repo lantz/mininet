@@ -12,13 +12,14 @@ class Intf( BaseIntf ):
 
     def __init__( self, name, node=None, port=None, link=None,
                   mac=None, **params ):
-        self.realname = params[ 'orgName' ]
+        self.realname = params.get( 'orgName' )
         BaseIntf.__init__( self, name, node=node, port=port, link=link,
                            mac=mac, **params )
 
     def ifconfig( self, *args ):
         "Configure ourselves using ifconfig"
-        o, err, ext = self.node.pexec( 'ifconfig', self.realname, *args )
+        name = self.realname if self.realname else self.name
+        o, err, ext = self.node.pexec( 'ifconfig', name, *args )
         if not err:
             return o
         return err

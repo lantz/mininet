@@ -17,12 +17,12 @@ from functools import partial
 def run( cmd ):
     """Simple interface to subprocess.call()
        cmd: list of command params"""
-    return call( cmd.split( ' ' ) )
+    return call( cmd.split() )
 
 def checkRun( cmd ):
     """Simple interface to subprocess.check_call()
        cmd: list of command params"""
-    return check_call( cmd.split( ' ' ) )
+    return check_call( cmd.split() )
 
 # pylint doesn't understand explicit type checking
 # pylint: disable=maybe-no-member
@@ -33,7 +33,7 @@ def oldQuietRun( *cmd ):
     if len( cmd ) == 1:
         cmd = cmd[ 0 ]
         if isinstance( cmd, str ):
-            cmd = cmd.split( ' ' )
+            cmd = cmd.split()
     popen = Popen( cmd, stdout=PIPE, stderr=STDOUT )
     # We can't use Popen.communicate() because it uses
     # select(), which can't handle
@@ -74,7 +74,7 @@ def errRun( *cmd, **kwargs ):
         cmd = cmd[ 0 ]
     # Allow passing in a list or a string
     if isinstance( cmd, str ) and not shell:
-        cmd = cmd.split( ' ' )
+        cmd = cmd.split()
         cmd = [ str( arg ) for arg in cmd ]
     elif isinstance( cmd, list ) and shell:
         cmd = " ".join( arg for arg in cmd )

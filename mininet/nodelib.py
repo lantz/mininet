@@ -155,17 +155,20 @@ class Bridge4( Switch ):
         "Start bridge. Retain the bridge's name to save on ifconfig calls"
         self.bname = 'bridge%d' % Bridge4.unitNo
         Bridge4.unitNo += 1
-        quietRun( 'ifconfig %s create rdomain %s up' % ( self.bname, self.rdid ) )
+
+        rdarg = 'rdomain %d' % self.rdid if self.inNamespace else ''
+        quietRun( 'ifconfig %s create %s up' % ( self.bname, rdarg ) )
         addcmd, stpcmd = '', ''
+        print( self.intfList() )
         for i in self.intfList():
-            if 'pair' in i.realname:
+            if i.realname and 'pair' in i.realname:
                 name = i.realname
                 addcmd += ' add ' + name
                 if self.stp:
                     stpcmd += ' stp ' + name
                     if self.prio:
                         stpcmd += ' ifpriority %s %d ' % ( name, self.prio )
-                quietRun( 'ifconfig %s rdomain %s up' % ( name, self.rdid ) )
+                quietRun( 'ifconfig %s %s up' % ( name, rdarg ) )
         quietRun( 'ifconfig ' + self.bname + addcmd )
 
     def stop( self, deleteIntfs=True ):
@@ -337,4 +340,20 @@ class IpfwNAT( Node ):
         if 'ipfw_nat.ko' not in klds:
             modprobe( 'ipfw_nat' )
 
-NAT = IpfwNAT if uname()[ 0 ] == 'FreeBSD' else IptablesNAT
+
+class PfNAT( Node ):
+    """
+    A pf-based NAT node. (to-do)
+    """
+    pass
+
+plat = uname()[ 0 ]
+if plat == 'FreeBSD':
+    NAT = IpfwNAT
+    ClassicBridge = IfBridge
+elif plat == 'OpenBSD':
+    NAT = PfNAT     #todo
+    ClassicBridge = Bridge4
+else:
+    NAT = IptablesNAT
+    ClassicBridge = LinuxBridge

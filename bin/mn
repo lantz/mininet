@@ -29,7 +29,7 @@ from mininet.node import ( Host, CPULimitedHost, Controller, OVSController,
                            DefaultController, NullController,
                            UserSwitch, OVSSwitch, OVSBridge,
                            IVSSwitch )
-from mininet.nodelib import LinuxBridge
+from mininet.nodelib import ClassicBridge
 from mininet.link import Link, TCLink, TCULink, OVSLink
 from mininet.topo import ( SingleSwitchTopo, LinearTopo,
                            SingleSwitchReversedTopo, MinimalTopo )
@@ -64,7 +64,7 @@ SWITCHES = { 'user': UserSwitch,
              # Keep ovsk for compatibility with 2.0
              'ovsk': OVSSwitch,
              'ivs': IVSSwitch,
-             'lxbr': LinuxBridge,
+             'sysbr': ClassicBridge,
              'default': OVSSwitch }
 
 HOSTDEF = 'proc'
@@ -338,7 +338,7 @@ class MininetRunner( object ):
                           'for default switch!\n' )
                     info( '*** Falling back to OVS Bridge\n' )
                     opts.switch = 'ovsbr'
-                elif opts.switch not in ( 'ovsbr', 'lxbr' ):
+                elif opts.switch not in ( 'ovsbr', 'sysbr' ):
                     raise Exception( "Could not find a default controller "
                                      "for switch %s" %
                                      opts.switch )

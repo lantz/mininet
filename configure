@@ -27,6 +27,6 @@ esac
 
 ln -s $inst $(pwd)/util/install.sh
 
-echo "export BINDIR=$prefix/bin"                         >> config.mk
-echo "export MANDIR=$mandir/man/man1"                    >> config.mk
-echo "export PKGDIR=$prefix/lib/python2.7/site-packages" >> config.mk
+echo "BINDIR=$prefix/bin"                         >> config.mk
+echo "MANDIR=$mandir/man/man1"                    >> config.mk
+echo "PKGDIR=$prefix/lib/python2.7/site-packages" >> config.mk
