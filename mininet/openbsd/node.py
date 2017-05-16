@@ -10,6 +10,7 @@ This is a collection of helpers that call the right commands to manipulate these
 components.
 """
 import signal
+import re
 from os import killpg
 
 from subprocess import PIPE, Popen
@@ -99,7 +100,8 @@ class Node( BaseNode ):
     def terminate( self ):
         """ Cleanup when node is killed.  """
         #self.unmountPrivateDirs()
-        Popen( [ 'ifconfig', self.pair, 'destroy' ] )
+        if self.pair:
+            Popen( [ 'ifconfig', self.pair, 'destroy' ] )
         if self.shell:
             if self.shell.poll() is None:
                 killpg( self.shell.pid, signal.SIGHUP )

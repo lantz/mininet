@@ -11,6 +11,8 @@ import signal
 from os import killpg
 
 from subprocess import PIPE, Popen
+
+from mininet.log import debug
 from mininet.util import quietRun
 from mininet.basenode import BaseNode
 

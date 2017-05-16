@@ -165,6 +165,7 @@ class BaseNode( object ):
         self.readbuf = self.readbuf[ pos + 1: ]
         return line
 
+    # overridden in some platforms
     def write( self, data ):
         """Write data to node.
            data: string"""

@@ -83,7 +83,7 @@ def _ifcfgClean( listCmd ):
                          for link in links[ i : i + n ] )
         sh( '( %s ) 2> /dev/null' % cmd )
 
-    if 'tap9' in sh( 'ifconfig -l' ):
+    if 'tap9' in sh( 'ifconfig' ):
         info( "*** Removing tap9 - assuming it's from cluster edition\n" )
         sh( 'ifconfig tap9 destroy' )
 
