@@ -49,8 +49,8 @@ class Node( BaseNode ):
             if Node.index == 256:
                 error( 'Exceeded supported number of hosts (255)' )
                 exit( 1 )
-            rcmd = [ 'ifconfig', self.pair, 'create', 'rdomain',
-                     '%d' % self.rdid ]
+            rcmd = [ 'ifconfig', self.pair, 'create', 'description',
+                     '"%s"' % self.name, 'rdomain', '%d' % self.rdid ]
             #execcmd = [ 'route', '-T%d' % self.rdid, 'exec' ] + execcmd
             Popen( rcmd, stdout=PIPE )
         else:

@@ -26,9 +26,9 @@ from mininet.log import lg, LEVELS, info, debug, warn, error, output
 from mininet.net import Mininet, MininetWithControlNet, VERSION
 from mininet.node import ( Host, CPULimitedHost, Controller, OVSController,
                            Ryu, NOX, RemoteController, findController,
-                           DefaultController, NullController,
+                           DefaultController, NullController, Switchd,
                            UserSwitch, OVSSwitch, OVSBridge,
-                           IVSSwitch )
+                           IVSSwitch, IfSwitch, DefaultSwitch )
 from mininet.nodelib import ClassicBridge
 from mininet.link import Link, TCLink, TCULink, OVSLink
 from mininet.topo import ( SingleSwitchTopo, LinearTopo,
@@ -64,8 +64,9 @@ SWITCHES = { 'user': UserSwitch,
              # Keep ovsk for compatibility with 2.0
              'ovsk': OVSSwitch,
              'ivs': IVSSwitch,
+             'ifsw': IfSwitch,
              'sysbr': ClassicBridge,
-             'default': OVSSwitch }
+             'default': DefaultSwitch }
 
 HOSTDEF = 'proc'
 HOSTS = { 'proc': Host,
@@ -78,6 +79,7 @@ CONTROLLERS = { 'ref': Controller,
                 'nox': NOX,
                 'remote': RemoteController,
                 'ryu': Ryu,
+                'swd': Switchd,
                 'default': DefaultController,  # Note: overridden below
                 'none': NullController }
 

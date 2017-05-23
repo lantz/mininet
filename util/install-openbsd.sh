@@ -44,6 +44,7 @@ mn_deps () {
     cur=$(pwd -P)
     cd ${MININET_DIR}/mininet
     doas make install
+    doas cp ${MININET_DIR}/util/switchd.conf /etc/switchd.mininet.conf
     cd ${cur}
 }
 
@@ -52,6 +53,7 @@ mn_undo () {
     cur=$(pwd -P)
     cd ${MININET_DIR}/mininet
     doas make uninstall
+    doas rm /etc/switchd.mininet.conf
     cd ${cur}
 }
 

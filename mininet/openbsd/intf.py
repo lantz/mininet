@@ -15,6 +15,7 @@ class Intf( BaseIntf ):
         self.realname = params.get( 'orgName' )
         BaseIntf.__init__( self, name, node=node, port=port, link=link,
                            mac=mac, **params )
+        self.ifconfig( 'description', '"%s"' % name )
 
     def ifconfig( self, *args ):
         "Configure ourselves using ifconfig"
@@ -32,12 +33,14 @@ class Intf( BaseIntf ):
     def rename( self, newname ):
         """
         Rename interface. We retain the real name of the interface as
-        self.realname since interfaces can't be renamed.
+        self.realname since interfaces can't be renamed. Instead we
+        add a description to the device.
         """
         if self.name in self.node.portNames:
             del self.node.portNames[ self.name ]
         self.node.portNames[ newname ] = self.realname
         self.name = newname
+        self.ifconfig( 'description', '"%s"' % newname )
         return newname
 
     def delete( self ):

@@ -822,7 +822,8 @@ class IfSwitch( Switch ):
     def start( self, _controllers ):
         "Start bridge. Retain the bridge's name to save on ifconfig calls"
         rdarg = 'rdomain %d' % self.rdid if self.inNamespace else ''
-        quietRun( 'ifconfig %s create %s up' % ( self.bname, rdarg ) )
+        quietRun( 'ifconfig %s create %s description "%s" up' %
+                  ( self.bname, rdarg, self.name ) )
         addcmd, stpcmd = '', ''
         print( self.intfList() )
         for i in self.intfList():
@@ -1176,13 +1177,16 @@ class Switchd( Controller ):
                   ' 1>' + cout + ' 2>' + cout )
         self.execed = False
 
-
+# TODO: push these uname-ey things elsewhere
 if plat == 'Linux':
     DefaultControllers = ( Controller, OVSController )
+    DefaultSwitch = OVSSwitch
 elif plat == 'FreeBSD':
     DefaultControllers = ( Ryu, )
+    DefaultSwitch = OVSSwitch
 else: # OpenBSD
     DefaultControllers = ( Switchd, )
+    DefaultSwitch = IfSwitch
 
 
 def findController( controllers=DefaultControllers ):
