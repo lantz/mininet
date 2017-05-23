@@ -832,6 +832,15 @@ class IfSwitch( Switch ):
                 quietRun( 'ifconfig %s %s up' % ( name, rdarg ) )
         quietRun( 'ifconfig ' + self.bname + addcmd )
 
+        # Connect to controller using switchctl(8) using /dev/switch*
+        if os.path.exists( self.cdev ):
+            # TODO : need to forward-to for RemoteController
+            quietRun( 'switchctl connect %s' % self.cdev )
+        else:
+            error( "Can't connect to controller: %s doesn't exist" %
+                   self.cdev )
+            exit( 1 )
+
     def stop( self, deleteIntfs=True ):
         """Stop bridge
            deleteIntfs: delete interfaces? (True)"""
@@ -975,7 +984,7 @@ class Controller( Node ):
         listening = self.cmd( "echo A | telnet -e A %s %d" %
                               ( self.ip, self.port ) )
         if 'Connected' in listening:
-            servers = self.cmd( 'netstat -natp' ).split( '\n' )
+            servers = self.cmd( 'netstat -nap tcp' ).split( '\n' )
             pstr = ':%d ' % self.port
             clist = servers[ 0:1 ] + [ s for s in servers if pstr in s ]
             raise Exception( "Please shut down the controller which is"
@@ -1134,7 +1143,47 @@ class RemoteController( Controller ):
         else:
             return True
 
-DefaultControllers = ( Controller, OVSController )
+
+class Switchd( Controller ):
+    """
+    switchd(4): OpenBSD SDN sflow controller.
+    """
+    def __init__( self, name, ip='127.0.0.1', port=6653,
+                  conf='/etc/switchd.mininet.conf', **kwargs):
+        cmd = '-f ' + conf
+        cmd += ' -D ctl_ip=%s -D port=%s' % ( ip, port )
+
+        # optional parameters (defaults)
+        tout = kwargs.get('timeout')    # MAC address timeout, seconds (240)
+        vflgs = kwargs.get('vflags')    # verbosity, e.g. '-vv'
+        csize = kwargs.get('cache')     # MAC address cache size (4096)
+
+        cmd += ' -t %s' % tout if tout else ''
+        cmd += ' ' + vflgs if vflgs else ''
+        cmd += ' -t %s' % tout if tout else ''
+
+        print( cmd )
+        Controller.__init__( self, name, ip=ip, port=port, command='switchd',
+                             cargs=cmd, **kwargs )
+
+    def start( self ):
+        """Start <controller> <args> on controller. Log to /tmp/cN.log"""
+        pathCheck( self.command )
+        cout = '/tmp/' + self.name + '.log'
+        if self.cdir is not None:
+            self.cmd( 'cd ' + self.cdir )
+        self.cmd( self.command + ' ' + self.cargs +
+                  ' 1>' + cout + ' 2>' + cout )
+        self.execed = False
+
+
+if plat == 'Linux':
+    DefaultControllers = ( Controller, OVSController )
+elif plat == 'FreeBSD':
+    DefaultControllers = ( Ryu, )
+else: # OpenBSD
+    DefaultControllers = ( Switchd, )
+
 
 def findController( controllers=DefaultControllers ):
     "Return first available controller from list, if any"
