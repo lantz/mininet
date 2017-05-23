@@ -103,7 +103,7 @@ class Node( BaseNode ):
     def terminate( self ):
         """ Cleanup when node is killed.  """
         #self.unmountPrivateDirs()
-        if self.pair:
+        if self.rdid:
             Popen( [ 'ifconfig', self.pair, 'destroy' ] )
         if self.shell:
             if self.shell.poll() is None:

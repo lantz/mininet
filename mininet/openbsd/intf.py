@@ -45,6 +45,7 @@ class Intf( BaseIntf ):
 
     def delete( self ):
         "Delete interface"
+        self.ifconfig( 'destroy' )
         if self.name in self.node.portNames:
             del self.node.portNames[ self.name ]
         self.node.delIntf( self )

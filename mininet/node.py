@@ -1005,8 +1005,10 @@ class Controller( Node ):
 
     def stop( self, *args, **kwargs ):
         "Stop controller."
-        self.cmd( 'kill %' + self.command )
-        self.cmd( 'wait %' + self.command )
+        pids = " ".join( self.cmd( 'pgrep ' + self.command ).split( '\n' ) )
+        debug( pids )
+        self.cmd( 'kill ' + pids )
+        self.cmd( 'wait ' + pids )
         super( Controller, self ).stop( *args, **kwargs )
 
     def IP( self, intf=None ):
