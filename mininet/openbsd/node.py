@@ -46,6 +46,9 @@ class Node( BaseNode ):
             # create the pair tied to an rdomain
             self.pair, self.rdid = 'pair%d' % Intf.next(), Node.index
             Node.index += 1
+            if Node.index == 256:
+                error( 'Exceeded supported number of hosts (255)' )
+                exit( 1 )
             rcmd = [ 'ifconfig', self.pair, 'create', 'rdomain',
                      '%d' % self.rdid ]
             #execcmd = [ 'route', '-T%d' % self.rdid, 'exec' ] + execcmd
@@ -148,7 +151,7 @@ class Node( BaseNode ):
         # add stronger checks for interface lookup
         cmd = 'route -T%s add -host %s %s'
         quietRun( cmd % ( self.rdid, ip, self.intfs( intf ).IP() ) )
-     
+
     def setDefaultRoute( self, intf=None ):
         """Set the default route to go through intf.
            intf: Intf or {dev <intfname> via <gw-ip> ...}"""
@@ -170,7 +173,8 @@ class Node( BaseNode ):
         super( Node, self ).addIntf( intf, port, moveIntfFn )
 
     def cmd( self, *args, **kwargs ):
-        """Send a command, wait for output, and return it.
+        """Send a command, wait for output, and return it. At this time this
+           does not allow CLI commands from the host, e.g. 'h1 ping h2'.
            cmd: string"""
         verbose = kwargs.get( 'verbose', False )
         log, kwargs[ 'echo' ] = info, True if verbose else debug

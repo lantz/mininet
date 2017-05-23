@@ -87,6 +87,18 @@ def _ifcfgClean( listCmd ):
         info( "*** Removing tap9 - assuming it's from cluster edition\n" )
         sh( 'ifconfig tap9 destroy' )
 
+def _ifcfgCleanLo( listCmd ):
+    """ link cleanup with 'ifconfig' that assumes formattable listCmd
+        that takes an interface unit name (see args for OpenBSD)"""
+    _ifcfgClean( listCmd % 'pair' )
+    los = sh( listCmd % 'lo' )
+    n = 256  # chunk size - can only have 256 max, per rdomain(4)
+    for i in range( 1, len( los ), n ):
+        cmd = ';'.join( 'ifconfig %s destroy' % lo
+                         for lo in los[ i : i + n ] )
+        sh( '( %s ) 2> /dev/null' % cmd )
+
+
 platform = uname()[ 0 ]
 if platform == 'FreeBSD':
     cleanLinks = _ifcfgClean
@@ -97,10 +109,12 @@ elif platform == 'Linux':
     cleanLinks, args = _iplinkClean, None
     pidsFunc   = _coPids
     cleanNodes = killprocs
-else:
-    cleanLinks, args = _ifcfgClean, "ifconfig pair | egrep -o '^pair[[:digit:]]+'"
+else: # OpenBSD
+    cleanLinks = _ifcfgCleanLo
+    args = "ifconfig %s | sed -n 's|\(^[a-z]\{1,\}[0-9]\{1,\}\):.*|\\1| p'"
     pidsFunc   = _coPids
     cleanNodes = killprocs
+
 
 class Cleanup( object ):
     "Wrapper for cleanup()"

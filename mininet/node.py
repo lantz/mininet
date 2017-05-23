@@ -798,14 +798,57 @@ class OVSSwitch( Switch ):
         return switches
 
 
-class DevSwitch( Switch ):
+class IfSwitch( Switch ):
     """
-    OpenBSD switch device switch. Supported on OpenBSD 6.1+.
+    OpenBSD switch(4) device switch. Supported on OpenBSD 6.1+.
+    TODOs : addlocal, dpid, maxflow, maxgroups, portno
     """
-    pass
+
+    unitNo = 0      # number following device name, e.g. 0 in bridge0
+
+    def __init__( self, name, **kwargs ):
+        self.bname = 'switch%d' % IfSwitch.unitNo
+        self.cdev = '/dev/' + self.bname
+        IfSwitch.unitNo += 1
+        Switch.__init__( self, name, **kwargs )
+
+    def connected( self ):
+        "Are we forwarding yet?"
+        if self.stp:
+            return 'UP' in self.cmd( 'ifconfig', self.bname )
+        else:
+            return True
+
+    def start( self, _controllers ):
+        "Start bridge. Retain the bridge's name to save on ifconfig calls"
+        rdarg = 'rdomain %d' % self.rdid if self.inNamespace else ''
+        quietRun( 'ifconfig %s create %s up' % ( self.bname, rdarg ) )
+        addcmd, stpcmd = '', ''
+        print( self.intfList() )
+        for i in self.intfList():
+            if i.realname and 'pair' in i.realname:
+                name = i.realname
+                addcmd += ' add ' + name
+                quietRun( 'ifconfig %s %s up' % ( name, rdarg ) )
+        quietRun( 'ifconfig ' + self.bname + addcmd )
+
+    def stop( self, deleteIntfs=True ):
+        """Stop bridge
+           deleteIntfs: delete interfaces? (True)"""
+        quietRun( 'ifconfig %s destroy' % self.bname )
+        super( IfSwitch, self ).stop( deleteIntfs )
+
+    def dpctl( self, *args ):
+        "Run brctl command"
+        # actually ifconfig
+        return quietRun( 'ifconfig', self.bname, *args )
 
 
-KernelSwitch = OVSSwitch if plat == 'Linux' else DevSwitch
+# technically there are only userspace OF switches for FreeBSD.
+if plat == 'Linux' or plat == 'FreeBSD':
+    KernelSwitch = OVSSwitch
+else:
+    KernelSwitch = IfSwitch # OpenBSD
 
 
 class OVSBridge( OVSSwitch ):
