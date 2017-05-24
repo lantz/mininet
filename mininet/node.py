@@ -825,7 +825,6 @@ class IfSwitch( Switch ):
         quietRun( 'ifconfig %s create %s description "%s" up' %
                   ( self.bname, rdarg, self.name ) )
         addcmd, stpcmd = '', ''
-        print( self.intfList() )
         for i in self.intfList():
             if i.realname and 'pair' in i.realname:
                 name = i.realname
@@ -1005,9 +1004,9 @@ class Controller( Node ):
 
     def stop( self, *args, **kwargs ):
         "Stop controller."
-        pids = " ".join( self.cmd( 'pgrep ' + self.command ).split( '\n' ) )
+        pids = " ".join( self.cmd( 'pgrep -f ' + self.command ).split( '\n' ) )
         debug( pids )
-        self.cmd( 'kill ' + pids )
+        self.cmd( 'kill ' + pids + ' 2>/dev/null' )
         self.cmd( 'wait ' + pids )
         super( Controller, self ).stop( *args, **kwargs )
 
@@ -1165,7 +1164,6 @@ class Switchd( Controller ):
         cmd += ' ' + vflgs if vflgs else ''
         cmd += ' -t %s' % tout if tout else ''
 
-        print( cmd )
         Controller.__init__( self, name, ip=ip, port=port, command='switchd',
                              cargs=cmd, **kwargs )
 

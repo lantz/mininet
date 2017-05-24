@@ -159,7 +159,6 @@ class Bridge4( Switch ):
         rdarg = 'rdomain %d' % self.rdid if self.inNamespace else ''
         quietRun( 'ifconfig %s create %s up' % ( self.bname, rdarg ) )
         addcmd, stpcmd = '', ''
-        print( self.intfList() )
         for i in self.intfList():
             if i.realname and 'pair' in i.realname:
                 name = i.realname

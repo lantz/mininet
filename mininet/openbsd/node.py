@@ -179,7 +179,6 @@ class Node( BaseNode ):
         from mininet.clean import sh
         verbose = kwargs.get( 'verbose', False )
         log, kwargs[ 'echo' ] = info, True if verbose else debug
-        log( '*** %s : %s\n' % ( self.name, args ) )
         if self.rdid:
             cmd = 'route -T%d exec ' % self.rdid + " ".join( args )
             return sh( cmd )

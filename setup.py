@@ -24,7 +24,8 @@ setup(
         'mininet',
         'mininet.examples',
         'mininet.linux',
-        'mininet.freebsd'
+        'mininet.freebsd',
+        'mininet.openbsd'
     ],
     long_description="""
         Mininet is a network emulator which uses lightweight

@@ -26,10 +26,10 @@ before building a VIMAGE kernel (as you're rebooting anyways).
 
 If they haven't been already, install `git` and `sudo`:
 
-    sudo pkg install git-lite sudo
+    pkg install git-lite sudo
 
-The install script, `install-fbsd.sh`, can be used to install Mininet,
-Open vSwitch, and Ryu along with their dependencies:
+The install script, `install.sh`, can be used to install Mininet, Open
+vSwitch, and Ryu along with their dependencies. It must be generated first:
 
     cd mininet
     ./configure

@@ -28,7 +28,7 @@ all () {
 mn_deps () {
     # check for OpenFlow support - 6.1 and later. Technically it works but
     # will only be able to do non-OFP networks.
-    if [ $( expr ${release} < 6.1 ) -eq 0 ]; then
+    if [ $( expr ${release} '<=' 6.1 ) -eq 0 ]; then
         printf '%s\n' \
             "Detected release:${release}"\
 	    "Warning - OpenFlow is only supported by releases 6.1 and newer"\
@@ -44,7 +44,7 @@ mn_deps () {
     cur=$(pwd -P)
     cd ${MININET_DIR}/mininet
     doas make install
-    doas cp ${MININET_DIR}/util/switchd.conf /etc/switchd.mininet.conf
+    doas cp util/switchd.conf /etc/switchd.mininet.conf
     cd ${cur}
 }
 

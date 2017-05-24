@@ -2,7 +2,7 @@ Mininet: Rapid Prototyping for Software Defined Networks
 ========================================================
 *The best way to emulate almost any network on your laptop!*
 
-Mininet 2.3.0d1
+Fork of Mininet 2.3.0d1
 
 [![Build Status][1]](https://travis-ci.org/mininet/mininet)
 
@@ -11,6 +11,7 @@ FreeBSD and OpenBSD, and is aimed to make it easier to add support for
 non-Linux systems. As such, the native install instructions are slightly
 different. This is also a heavy work-in-progress so things may be broken or
 unsupported.*
+
 
 ### What is Mininet?
 
@@ -25,6 +26,7 @@ especially those using OpenFlow and SDN.  OpenFlow-based network
 controllers prototyped in Mininet can usually be transferred to
 hardware with minimal changes for full line-rate execution.
 
+
 ### How does it work?
 
 Mininet creates virtual networks using process-based virtualization
@@ -38,6 +40,12 @@ Mininet are software-based switches like Open vSwitch or the OpenFlow
 reference switch.  Links are virtual ethernet pairs, which live in the
 Linux kernel and connect our emulated switches to emulated hosts
 (processes).
+
+The port to other platforms rely on similar OS-level resource
+virtualization features comparable to Linux namespaces. In specific, the
+FreeBSD port relies on jails and VIMAGE, and the OpenBSD port relies on
+rdomains.
+
 
 ### Features
 
@@ -99,8 +107,17 @@ This is primarily a performance improvement and bug fix release.
 
 If you are using a Linux, see `INSTALL` for installation instructions and
 details. If you are using FreeBSD, see `INSTALL.FreeBSD`. On OpenBSD,
-`./configure` followed by `./util/install.sh -a` should be all that's
-needed.
+`./configure` followed by `./util/install.sh -a` should be all that is
+required.
+
+
+### De-Installation
+
+The FreeBSD and OpenBSD ports come with an 'uninstall' feature that
+removes the Mininet core libraries and related files (but not the
+additional packages that were installed): 
+
+`./util/install.sh -u`
 
 
 ### Documentation
@@ -115,12 +132,17 @@ contribute to, particularly the Frequently Asked Questions (FAQ.)
 Details about FreeBSD support are available on the 
 [FreeBSD wiki Mininet page](https://wiki.freebsd.org/Mininet).
 
+Details about OpenBSD support are found in `INSTALL.OpenBSD`.
+
+
 ### Support
 
-Mininet is community-supported. We encourage you to join the
-Mininet mailing list, `mininet-discuss` at:
+This fork of Mininet is an experiment that isn't supported by the
+Mininet community; However, Mininet-related questions pertaining to the
+features of the original Mininet can be directed to `mininet-discuss`:
 
 <https://mailman.stanford.edu/mailman/listinfo/mininet-discuss>
+
 
 ### Join Us
 
