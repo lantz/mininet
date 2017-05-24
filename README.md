@@ -1,16 +1,13 @@
 Mininet: Rapid Prototyping for Software Defined Networks
 ========================================================
-*The best way to emulate almost any network on your laptop!*
 
 Fork of Mininet 2.3.0d1
 
-[![Build Status][1]](https://travis-ci.org/mininet/mininet)
-
 *This is a heavily refactored version of Mininet that also supports
 FreeBSD and OpenBSD, and is aimed to make it easier to add support for
-non-Linux systems. As such, the native install instructions are slightly
-different. This is also a heavy work-in-progress so things may be broken or
-unsupported.*
+non-Linux systems. As such, the native install instructions are
+slightly different. This is also a heavy work-in-progress so things
+may be broken or unsupported.*
 
 
 ### What is Mininet?
@@ -25,26 +22,6 @@ Mininet is useful for interactive development, testing, and demos,
 especially those using OpenFlow and SDN.  OpenFlow-based network
 controllers prototyped in Mininet can usually be transferred to
 hardware with minimal changes for full line-rate execution.
-
-
-### How does it work?
-
-Mininet creates virtual networks using process-based virtualization
-and network namespaces - features that are available in recent Linux
-kernels.  In Mininet, hosts are emulated as `bash` processes running in
-a network namespace, so any code that would normally run on a Linux
-server (like a web server or client program) should run just fine
-within a Mininet "Host".  The Mininet "Host" will have its own private
-network interface and can only see its own processes.  Switches in
-Mininet are software-based switches like Open vSwitch or the OpenFlow
-reference switch.  Links are virtual ethernet pairs, which live in the
-Linux kernel and connect our emulated switches to emulated hosts
-(processes).
-
-The port to other platforms rely on similar OS-level resource
-virtualization features comparable to Linux namespaces. In specific, the
-FreeBSD port relies on jails and VIMAGE, and the OpenBSD port relies on
-rdomains.
 
 
 ### Features
@@ -81,34 +58,17 @@ Mininet includes:
 
   `mn -c`
 
-### New features in this release
+Different platform ports support varying subsets of the base (Linux)
+version. Refer to the documentation/notes for each platform for
+the specifics.
 
-This is primarily a performance improvement and bug fix release.
-
-- Batch startup has been implemented for Open vSwitch, improving
-  startup performance.
-
-- OVS patch links have been implemented via OVSLink and --link ovs
-
-  Warning! These links have *serious limitations* compared to
-  virtual Ethernet pairs: they are not attached to real Linux
-  interfaces so you cannot use tcpdump or wireshark with them;
-  they also cannot be used in long chains - we don't recommend more
-  than 64 OVSLinks, for example --linear,64. However, they can offer
-  significantly better performance than veth pairs, for certain
-  configurations.
-
-- You can now easily install Mininet on a Raspberry Pi ;-)
-
-- Additional information for this release and previous releases
-  may be found in the release notes on docs.mininet.org
 
 ### Installation
 
-If you are using a Linux, see `INSTALL` for installation instructions and
-details. If you are using FreeBSD, see `INSTALL.FreeBSD`. On OpenBSD,
-`./configure` followed by `./util/install.sh -a` should be all that is
-required.
+If you are using a Linux, see `INSTALL` for installation instructions
+and details. If you are using FreeBSD, see `INSTALL.FreeBSD`. On
+OpenBSD, `./configure` followed by `./util/install.sh -a` should be
+all that is required.
 
 
 ### De-Installation
@@ -138,30 +98,9 @@ Details about OpenBSD support are found in `INSTALL.OpenBSD`.
 ### Support
 
 This fork of Mininet is an experiment that isn't supported by the
-Mininet community; However, Mininet-related questions pertaining to the
-features of the original Mininet can be directed to `mininet-discuss`:
+Mininet community; However, Mininet-related questions pertaining to
+the features of the original Mininet can be directed to
+`mininet-discuss`:
 
 <https://mailman.stanford.edu/mailman/listinfo/mininet-discuss>
 
-
-### Join Us
-
-Thanks again to all of the Mininet contributors!
-
-Mininet is an open source project and is currently hosted
-at <https://github.com/mininet>.  You are encouraged to download
-the code, examine it, modify it, and submit bug reports, bug fixes,
-feature requests, new features and other issues and pull requests.
-Thanks to everyone who has contributed code to the Mininet project
-(see CONTRIBUTORS for more info!) It is because of everyone's
-hard work that Mininet continues to grow and improve.
-
-### Enjoy Mininet
-
-Best wishes, and we look forward to seeing what you can do with
-Mininet to change the networking world!
-
-Bob Lantz  
-Mininet Core Team
-
-[1]: https://travis-ci.org/mininet/mininet.svg?branch=master
