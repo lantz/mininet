@@ -814,10 +814,7 @@ class IfSwitch( Switch ):
 
     def connected( self ):
         "Are we forwarding yet?"
-        if self.stp:
-            return 'UP' in self.cmd( 'ifconfig', self.bname )
-        else:
-            return True
+        return self.bname in self.cmd( 'switchctl show switches' )
 
     def start( self, _controllers ):
         "Start bridge. Retain the bridge's name to save on ifconfig calls"

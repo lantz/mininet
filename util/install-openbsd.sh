@@ -36,7 +36,7 @@ mn_deps () {
 	exit 1
     fi
 
-    $install python2.7.13p0 socat iperf help2man py-setuptools pyflakes \
+    $install python-2.7.13p0 socat iperf help2man py-setuptools pyflakes \
         pylint pep8 py-pexpect
         # gcc gmake
 
