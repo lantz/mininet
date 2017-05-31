@@ -26,7 +26,7 @@ libraries along with its dependencies. It must be generated first:
 
     cd mininet
     ./configure
-    util/install.sh -a #or with flag -n 
+    util/install.sh -a #or with flag -n
 
 `install.sh -h` will give you all available options.
 
@@ -53,12 +53,22 @@ This essentially undoes `install.sh -n`.
 ### Limitations/Bugs
 
 * The mechanisms used by the Mininet CLI to wait on commands issued through
-* nodes is unsupported - therefore commands that take the form
+  nodes is currently unsupported - therefore commands that take the form
 
-    h1 <command>
+     h1 <command>
 
- are pretty badly broken, as are some other non-node-context  CLI commands e.g.
-`iperf`. However, it is still possible to execute commands using `route(8)`:
+are badly broken, as are some other non-node-context  CLI commands e.g.
+`iperf`. However, it is still possible to execute commands using either:
+
+1) the CLI's `py` command and Node.cmd():
+
+    py h1.cmd('ping -c1 10.0.0.2')
+
+The node will take care of invoking the command in the correct rdomain.
+However, this must be given a command that will complete.
+
+
+2) OpenBSD's `route(8)`:
 
     route -T n exec <command>
 
@@ -70,8 +80,8 @@ interface whose description contains the node's name:
     ---->   description: "h1"
             ...
 
-(as background: a Mininet host is comprised of a pair(4) instance in a routing
-domain)
+As background: a Mininet host is comprised of a pair(4) instance in a routing
+domain.
 
 * The number of hosts (or nodes within their own 'namespaces') is limited to 255,
 the highest ID that can be given to an rdomain.

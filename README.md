@@ -26,6 +26,10 @@ hardware with minimal changes for full line-rate execution.
 
 ### Features
 
+*Different platform ports support varying subsets of the base (Linux)
+version described below. Refer to the documentation/notes for each
+platform for the specifics.*
+
 Mininet includes:
 
 * A command-line launcher (`mn`) to instantiate networks.
@@ -58,9 +62,8 @@ Mininet includes:
 
   `mn -c`
 
-Different platform ports support varying subsets of the base (Linux)
-version. Refer to the documentation/notes for each platform for
-the specifics.
+   (Note: this is a fairly blunt command that may remove non-Mininet
+    related things)
 
 
 ### Installation
