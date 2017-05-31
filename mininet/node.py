@@ -846,8 +846,8 @@ class IfSwitch( Switch ):
 
     def dpctl( self, *args ):
         "Run brctl command"
-        # actually ifconfig
-        return quietRun( 'ifconfig', self.bname, *args )
+        # actually switchctl
+        return self.cmd( 'switchctl', *args )
 
 
 # technically there are only userspace OF switches for FreeBSD.

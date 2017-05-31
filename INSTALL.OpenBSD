@@ -17,6 +17,10 @@ If it hasn't been already, install `git`:
 
     doas pkg_add git
 
+Fetch the repo and checkout this branch:
+
+    git fetch https://github.com/akoshibe/mininet.git
+
 The install script, `install.sh`, can be used to install the Mininet core
 libraries along with its dependencies. It must be generated first:
 

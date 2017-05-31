@@ -28,6 +28,10 @@ If they haven't been already, install `git` and `sudo`:
 
     pkg install git-lite sudo
 
+Fetch the repo and checkout this branch:
+
+    git fetch https://github.com/akoshibe/mininet.git
+
 The install script, `install.sh`, can be used to install Mininet, Open
 vSwitch, and Ryu along with their dependencies. It must be generated first:
 

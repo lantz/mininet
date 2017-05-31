@@ -73,8 +73,7 @@ def _iplinkClean( listCmd=None ):
         info( "*** Removing tap9 - assuming it's from cluster edition\n" )
         sh( 'ip link del tap9' )
 
-def _ifcfgClean( listCmd ):
-    """ link cleanup with 'ifconfig'"""
+def _ifClean( listCmd ):
     links = sh( listCmd ).splitlines()
     # Delete blocks of links
     n = 1000  # chunk size
@@ -83,6 +82,9 @@ def _ifcfgClean( listCmd ):
                          for link in links[ i : i + n ] )
         sh( '( %s ) 2> /dev/null' % cmd )
 
+def _ifcfgClean( listCmd ):
+    """ link cleanup with 'ifconfig'"""
+    _ifClean( listCmd )
     if 'tap9' in sh( 'ifconfig' ):
         info( "*** Removing tap9 - assuming it's from cluster edition\n" )
         sh( 'ifconfig tap9 destroy' )
@@ -90,11 +92,13 @@ def _ifcfgClean( listCmd ):
 def _ifcfgCleanLo( listCmd ):
     """ link cleanup with 'ifconfig' that assumes formattable listCmd
         that takes an interface unit name (see args for OpenBSD)"""
+    _ifClean( listCmd % 'switch' )
     _ifcfgClean( listCmd % 'pair' )
-    los = sh( listCmd % 'lo' )
+
+    los = sh( listCmd % 'lo' ).splitlines()
     n = 256  # chunk size - can only have 256 max, per rdomain(4)
     for i in range( 1, len( los ), n ):
-        cmd = ';'.join( 'ifconfig %s destroy' % lo
+        cmd = ';'.join( 'ifconfig %s rdomain 0 destroy' % lo
                          for lo in los[ i : i + n ] )
         sh( '( %s ) 2> /dev/null' % cmd )
 
@@ -105,15 +109,20 @@ if platform == 'FreeBSD':
     args       = "ifconfig -l | egrep -o '([-_.[:alnum:]]+-eth[[:digit:]]+)'"
     pidsFunc   = _popenPids
     cleanNodes = killnodes
+    zkill_cmd = ( 'killall -9 ping mnexec ryu-manager' )
 elif platform == 'Linux':
     cleanLinks, args = _iplinkClean, None
     pidsFunc   = _coPids
     cleanNodes = killprocs
+    zkill_cmd = ( 'killall -9 controller ofprotocol ofdatapath ping nox_core'
+                'lt-nox_core ovs-openflowd ovs-controller'
+                'ovs-testcontroller udpbwtest mnexec ivs ryu-manager' )
 else: # OpenBSD
     cleanLinks = _ifcfgCleanLo
     args = "ifconfig %s | sed -n 's|\(^[a-z]\{1,\}[0-9]\{1,\}\):.*|\\1| p'"
     pidsFunc   = _coPids
     cleanNodes = killprocs
+    zkill_cmd = ( 'pkill -9 ping mnexec switchd' )
 
 
 class Cleanup( object ):
@@ -128,19 +137,16 @@ class Cleanup( object ):
 
         info( "*** Removing excess controllers/ofprotocols/ofdatapaths/"
               "pings/noxes\n" )
-        zombies = ( 'controller ofprotocol ofdatapath ping nox_core'
-                    'lt-nox_core ovs-openflowd ovs-controller'
-                    'ovs-testcontroller udpbwtest mnexec ivs ryu-manager' )
         # Note: real zombie processes can't actually be killed, since they
         # are already (un)dead. Then again,
         # you can't connect to them either, so they're mostly harmless.
         # Send SIGTERM first to give processes a chance to shutdown cleanly.
-        sh( 'killall ' + zombies + ' 2> /dev/null' )
+        sh( zkill_cmd + ' 2> /dev/null' )
         time.sleep( 1 )
-        sh( 'killall -9 ' + zombies + ' 2> /dev/null' )
+        sh( zkill_cmd + ' 2> /dev/null' )
 
         # And kill off sudo mnexec
-        sh( 'pkill -9 -f "sudo mnexec"')
+        sh( 'pkill -9 -f "mnexec"')
 
         info( "*** Removing junk from /tmp\n" )
         sh( 'rm -f /tmp/vconn* /tmp/vlogs* /tmp/*.out /tmp/*.log' )
