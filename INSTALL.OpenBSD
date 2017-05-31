@@ -45,9 +45,9 @@ Alternatively, a `pingall` can be run from the CLI for a similar sanity check:
 
 The Mininet core files can be uninstalled with the same install script:
 
-    doas util/install.sh -u
+    util/install.sh -u
 
-This essentially undoes `install.sh -n`.
+This essentially undoes `install.sh -n` minus the package dependencies.
 
 
 ### Limitations/Bugs
@@ -55,44 +55,44 @@ This essentially undoes `install.sh -n`.
 * The mechanisms used by the Mininet CLI to wait on commands issued through
   nodes is currently unsupported - therefore commands that take the form
 
-     h1 <command>
+      h1 <command>
 
-are badly broken, as are some other non-node-context  CLI commands e.g.
-`iperf`. However, it is still possible to execute commands using either:
+  are badly broken, as are some other non-node-context  CLI commands e.g.
+  iperf. However, it is still possible to execute commands using either:
 
-1) the CLI's `py` command and Node.cmd():
+  1: The CLI's `py` command and Node.cmd():
 
-    py h1.cmd('ping -c1 10.0.0.2')
+        py h1.cmd('ping -c1 10.0.0.2')
 
-The node will take care of invoking the command in the correct rdomain.
-However, this must be given a command that will complete.
+     The node will take care of invoking the command in the correct rdomain.
+     However, this must be given a command that will complete.
 
+  2: OpenBSD's `route(8)`:
 
-2) OpenBSD's `route(8)`:
+        route -T n exec <command>
 
-    route -T n exec <command>
+     where 'n' is the rdomain ID. This value can be found by searching for the
+     interface whose description contains the node's name:
 
-where 'n' is the rdomain ID. This value can be found by searching for the
-interface whose description contains the node's name:
+        pair0: flags=8802<BROADCAST,SIMPLEX,MULTICAST> rdomain 1 mtu 1500
+               lladdr fe:e1:ba:d0:fe:68
+      ====>    description: "h1"
+               ...
 
-    pair0: flags=8802<BROADCAST,SIMPLEX,MULTICAST> rdomain 1 mtu 1500
-            lladdr fe:e1:ba:d0:fe:68
-    ---->   description: "h1"
-            ...
-
-As background: a Mininet host is comprised of a pair(4) instance in a routing
-domain.
+     As background: a Mininet host is comprised of a pair(4) instance in a routing
+     domain.
 
 * The number of hosts (or nodes within their own 'namespaces') is limited to 255,
-the highest ID that can be given to an rdomain.
+  the highest ID that can be given to an rdomain.
 
 * The mechanism currently used to connect a switch to the controller uses the
-/dev/switch* character device in a bluntly straightforward way, meaning that the
-number of switches gets limited to the number of these devices.
+  /dev/switch* character device in a bluntly straightforward way, meaning that the
+  number of switches gets limited to the number of these devices.
 
 * Only the basic network elements (Node, Switch, Link, Controller, Host) are
-supported, i.e. there are no NAT or any resource/bandwidth-limited elements.
-Additionally, no work has been done to try to support non-native components such
-as Open vSwitch or the many controllers (NOX, POX, Ryu...)
+  supported, i.e. there are no NAT or any resource/bandwidth-limited elements.
+  Additionally, no work has been done to try to support non-native components such
+  as Open vSwitch or the many controllers (NOX, POX, Ryu...)
 
-
+* The `dpctl` CLI command (mapped to `switchctl`) isn't constrained to a
+  switch, so it will print the same text per switch.
