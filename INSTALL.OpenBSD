@@ -53,8 +53,7 @@ which is the same as `doas make uninstall`.
 
 ### Limitations/Bugs
 
-* The mechanisms used by the Mininet CLI to wait on commands issued through
-  nodes is currently unsupported - therefore commands that take the form
+* The nodes currently do not run a long-lived `bash`, so that take the form
 
       h1 <command>
 
