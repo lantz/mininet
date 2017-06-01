@@ -3,11 +3,11 @@ Mininet: Rapid Prototyping for Software Defined Networks
 
 Fork of Mininet 2.3.0d1
 
-*This is a heavily refactored version of Mininet that also supports
-FreeBSD and OpenBSD, and is aimed to make it easier to add support for
+This is a heavily refactored version of Mininet that also supports
+FreeBSD and OpenBSD, and attempts to make it easier to add support for
 non-Linux systems. As such, the native install instructions are
 slightly different. This is also a heavy work-in-progress so things
-may be broken or unsupported.*
+may be broken or unsupported.
 
 
 ### What is Mininet?
@@ -25,10 +25,6 @@ hardware with minimal changes for full line-rate execution.
 
 
 ### Features
-
-*Different platform ports support varying subsets of the base (Linux)
-version described below. Refer to the documentation/notes for each
-platform for the specifics.*
 
 Mininet includes:
 
@@ -66,21 +62,15 @@ Mininet includes:
     related things)
 
 
+Note, different platform ports support varying subsets of the base
+(Linux) version described below. Refer to the documentation/notes for
+each platform for the specifics.
+
+
 ### Installation
 
-If you are using a Linux, see `INSTALL` for installation instructions
-and details. If you are using FreeBSD, see `INSTALL.FreeBSD`. On
-OpenBSD, `./configure` followed by `./util/install.sh -a` should be
-all that is required.
-
-
-### De-Installation
-
-The FreeBSD and OpenBSD ports come with an 'uninstall' feature that
-removes the Mininet core libraries and related files (but not the
-additional packages that were installed): 
-
-`./util/install.sh -u`
+The installation instructions and other details are found in the
+`INSTALL.*` files.
 
 
 ### Documentation
@@ -95,7 +85,8 @@ contribute to, particularly the Frequently Asked Questions (FAQ.)
 Details about FreeBSD support are available on the 
 [FreeBSD wiki Mininet page](https://wiki.freebsd.org/Mininet).
 
-Details about OpenBSD support are found in `INSTALL.OpenBSD`.
+The details and status of OpenBSD support are found in
+`INSTALL.OpenBSD`.
 
 
 ### Support

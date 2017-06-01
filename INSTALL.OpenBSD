@@ -1,5 +1,5 @@
-Mininet installation notes for OpenBSD
---------------------------------------
+Mininet installation (and general) notes for OpenBSD
+----------------------------------------------------
 
 Currently, the only option is native installation.
 
@@ -8,7 +8,7 @@ Currently, the only option is native installation.
 
 This Mininet port relies on the native OpenFlow switch and controller,
 `switch(4)` and `switchd(8)`, respecitvely - meaning that it assumes that you
-are using OpenBSD 6.1. It also makes use of `doas(1)` instead of `sudo`.
+are using OpenBSD 6.1. It also makes use of `doas` instead of `sudo`.
 
 
 ### Installation
@@ -47,7 +47,8 @@ The Mininet core files can be uninstalled with the same install script:
 
     util/install.sh -u
 
-This essentially undoes `install.sh -n` minus the package dependencies.
+This essentially undoes `install.sh -n` minus the package dependencies,
+which is the same as `doas make uninstall`.
 
 
 ### Limitations/Bugs
@@ -57,8 +58,8 @@ This essentially undoes `install.sh -n` minus the package dependencies.
 
       h1 <command>
 
-  are badly broken, as are some other non-node-context  CLI commands e.g.
-  iperf. However, it is still possible to execute commands using either:
+  are badly broken, as are some other non-node-context CLI commands e.g.
+  `iperf`. However, it is still possible to execute commands using either:
 
   1: The CLI's `py` command and Node.cmd():
 
@@ -94,5 +95,5 @@ This essentially undoes `install.sh -n` minus the package dependencies.
   Additionally, no work has been done to try to support non-native components such
   as Open vSwitch or the many controllers (NOX, POX, Ryu...)
 
-* The `dpctl` CLI command (mapped to `switchctl`) isn't constrained to a
+* The `dpctl` CLI command (mapped to `switchctl`) isn't constrained to one
   switch, so it will print the same text per switch.
