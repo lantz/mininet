@@ -835,10 +835,10 @@ class IfSwitch( Switch ):
             args = 'switchctl connect ' + self.cdev
             ctl = controllers[ 0 ] if controllers else None
             if not isinstance( ctl, Switchd ):
-                args += ' forward-to ' + ctl.IP()
+                args += ' forward-to %s:%d' % ( ctl.IP(), ctl.port )
                 # start local Switchd instance and have it forward
                 if not IfSwitch.local:
-                    IfSwitch.local = Switchd('lc0')
+                    IfSwitch.local = Switchd( 'lc0', port=6633 )
                     IfSwitch.local.start()
             quietRun( args )
         else:
