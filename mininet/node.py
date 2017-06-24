@@ -805,6 +805,7 @@ class IfSwitch( Switch ):
     """
 
     unitNo = 0      # number following device name, e.g. 0 in bridge0
+    local = None    # local switchd instance for remote connection
 
     def __init__( self, name, **kwargs ):
         self.bname = 'switch%d' % IfSwitch.unitNo
@@ -816,7 +817,7 @@ class IfSwitch( Switch ):
         "Are we forwarding yet?"
         return self.bname in self.cmd( 'switchctl show switches' )
 
-    def start( self, _controllers ):
+    def start( self, controllers ):
         "Start bridge. Retain the bridge's name to save on ifconfig calls"
         rdarg = 'rdomain %d' % self.rdid if self.inNamespace else ''
         quietRun( 'ifconfig %s create %s description "%s" up' %
@@ -831,17 +832,35 @@ class IfSwitch( Switch ):
 
         # Connect to controller using switchctl(8) using /dev/switch*
         if os.path.exists( self.cdev ):
-            # TODO : need to forward-to for RemoteController
-            quietRun( 'switchctl connect %s' % self.cdev )
+            args = 'switchctl connect ' + self.cdev
+            ctl = controllers[ 0 ] if controllers else None
+            if not isinstance( ctl, Switchd ):
+                args += ' forward-to ' + ctl.IP()
+                # start local Switchd instance and have it forward
+                if not IfSwitch.local:
+                    IfSwitch.local = Switchd('lc0')
+                    IfSwitch.local.start()
+            quietRun( args )
         else:
-            error( "Can't connect to controller: %s doesn't exist" %
-                   self.cdev )
-            exit( 1 )
+            # try to make character device, check and try to connect again
+            quietRun( '/dev/MAKEDEV ' + self.bname )
+            quietRun( 'mv %s /dev/' % self.bname )
+            if os.path.exists( self.cdev ):
+                # TODO : need to forward-to for RemoteController
+                quietRun( 'switchctl connect %s' % self.cdev )
+            else:
+                error( "Can't connect to controller: %s doesn't exist" %
+                       self.cdev )
+                exit( 1 )
 
     def stop( self, deleteIntfs=True ):
         """Stop bridge
            deleteIntfs: delete interfaces? (True)"""
         quietRun( 'ifconfig %s destroy' % self.bname )
+        # hack: the last switch destroys the local controller
+        last = 'switch%d' % ( IfSwitch.unitNo - 1 )
+        if self.bname == last:
+            quietRun( 'pkill switchd' )
         super( IfSwitch, self ).stop( deleteIntfs )
 
     def dpctl( self, *args ):
@@ -1173,6 +1192,7 @@ class Switchd( Controller ):
         self.cmd( self.command + ' ' + self.cargs +
                   ' 1>' + cout + ' 2>' + cout )
         self.execed = False
+
 
 # TODO: push these uname-ey things elsewhere
 if plat == 'Linux':
