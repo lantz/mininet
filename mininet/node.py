@@ -62,11 +62,14 @@ if plat == 'FreeBSD':
     from mininet.freebsd.node import Node
     from mininet.freebsd.intf import Intf
     from mininet.freebsd.util import ( LO, DP_MODE, numCores, moveIntf )
+    OVS_RCSTR = ( 'service ovsdb-server (one)start\n'
+                  'service ovs-vswitchd (one)start\n' )
 elif plat == 'Linux':
     from mininet.linux.node import Node
     from mininet.linux.intf import Intf
     from mininet.linux.util import ( LO, DP_MODE, numCores, moveIntf,
                                      mountCgroups )
+    OVS_RCSTR = 'service openvswitch-switch start\n'
 else:
     from mininet.openbsd.node import Node
     from mininet.openbsd.intf import Intf
@@ -611,8 +614,8 @@ class OVSSwitch( Switch ):
                    'Make sure that Open vSwitch is installed, '
                    'that ovsdb-server is running, and that\n'
                    '"ovs-vsctl show" works correctly.\n'
-                   'You may wish to try '
-                   '"service openvswitch-switch start".\n' )
+                   'You may wish to try the following:\n\n'
+                   + OVS_RCSTR + '\n' )
             exit( 1 )
         version = quietRun( 'ovs-vsctl --version' )
         cls.OVSVersion = findall( r'\d+\.\d+', version )[ 0 ]
