@@ -812,7 +812,8 @@ class IfSwitch( Switch ):
 
     def __init__( self, name, **kwargs ):
         self.bname = 'switch%d' % IfSwitch.unitNo
-        self.cdev = '/dev/' + self.bname
+        self.cdev = '/dev/' + self.bname    # character device name
+        self.newcdev = False                # created a new device?
         IfSwitch.unitNo += 1
         Switch.__init__( self, name, **kwargs )
 
@@ -848,6 +849,7 @@ class IfSwitch( Switch ):
             # try to make character device, check and try to connect again
             quietRun( '/dev/MAKEDEV ' + self.bname )
             quietRun( 'mv %s /dev/' % self.bname )
+            self.newcdev = True
             if os.path.exists( self.cdev ):
                 # TODO : need to forward-to for RemoteController
                 quietRun( 'switchctl connect %s' % self.cdev )
@@ -864,6 +866,8 @@ class IfSwitch( Switch ):
         last = 'switch%d' % ( IfSwitch.unitNo - 1 )
         if self.bname == last:
             quietRun( 'pkill switchd' )
+        if self.newcdev:
+            quietRun( 'rm ' + self.cdev )
         super( IfSwitch, self ).stop( deleteIntfs )
 
     def dpctl( self, *args ):
