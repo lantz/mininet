@@ -106,7 +106,7 @@ class Node( BaseNode ):
            kwargs: Popen() keyword args"""
         defaults = { 'stdout': PIPE, 'stderr': PIPE,
                      'mncmd':
-                     [ 'jexec', self.name ] if self.jid else [ 'mnexec', '-d' ] }
+                     [ 'jexec', self.jid ] if self.jid else [ 'mnexec', '-d' ] }
         defaults.update( kwargs )
         if len( args ) == 1:
             if isinstance( args[ 0 ], list ):
