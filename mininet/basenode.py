@@ -91,8 +91,6 @@ class BaseNode( object ):
         # received by the parent
         master, slave = pty.openpty()
         self.shell = self.getShell( master, slave, mnopts )
-        if not self.shell:
-            return
         self.stdin = os.fdopen( master, 'rw' )
         self.stdout = self.stdin
         self.pid = self.shell.pid

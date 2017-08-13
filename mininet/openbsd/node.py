@@ -39,8 +39,8 @@ class Node( BaseNode ):
         a pair interface is created, assigned to an rdomain, and a shell is
         exec'd in the rdomain.
         """
-        #execcmd = [ 'mnexec' ]
-        #opts = '-cd' if mnopts is None else mnopts
+        execcmd = [ 'mnexec' ]
+        opts = '-cd' if mnopts is None else mnopts
 
         if self.inNamespace:
             # create the pair tied to an rdomain
@@ -51,21 +51,18 @@ class Node( BaseNode ):
                 exit( 1 )
             rcmd = [ 'ifconfig', self.pair, 'create', 'description',
                      '"%s"' % self.name, 'rdomain', '%d' % self.rdid ]
-            #execcmd = [ 'route', '-T%d' % self.rdid, 'exec' ] + execcmd
             Popen( rcmd, stdout=PIPE )
+            execcmd = [ 'route', '-T%d' % self.rdid, 'exec' ] + execcmd
         else:
             self.pair = None
             self.rdid = None
 
-        # bash -i: force interactive
         # -s: pass $* to shell, and make process easy to find in ps. The prompt
-        # is set to sentinel chr( 127 )
-        #cmd = execcmd + [ opts, 'env', 'PS1=' + chr( 127 ), '/bin/sh', '-is',
-        #                  'mininet:' + self.name ]
-
-        #return Popen( cmd, stdin=slave, stdout=slave, stderr=slave,
-        #              close_fds=False )
-        return None
+        # is set to sentinel chr( 127 ), but may require a hash (#) in it.
+        cmd = execcmd + [ opts, 'env', 'PS1=#' + chr( 127 ), '/bin/ksh',
+                          '-is', 'mininet:' + self.name ]
+        return Popen( cmd, stdin=slave, stdout=slave, stderr=slave,
+                      close_fds=False )
 
     def mountPrivateDirs( self ):
         "mount private directories"
@@ -174,16 +171,3 @@ class Node( BaseNode ):
     def addIntf( self, intf, port=None, moveIntfFn=moveIntf ):
         self.portNames[ intf.name ] = intf.realname
         super( Node, self ).addIntf( intf, port, moveIntfFn )
-
-    def cmd( self, *args, **kwargs ):
-        """Send a command, wait for output, and return it. At this time this
-           does not allow CLI commands from the host, e.g. 'h1 ping h2'.
-           cmd: string"""
-        from mininet.clean import sh
-        verbose = kwargs.get( 'verbose', False )
-        log, kwargs[ 'echo' ] = info, True if verbose else debug
-        if self.rdid:
-            cmd = 'route -T%d exec ' % self.rdid + " ".join( args )
-            return sh( cmd )
-        else:
-            return sh( " ".join( args ) )
