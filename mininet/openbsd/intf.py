@@ -66,6 +66,18 @@ class Intf( BaseIntf ):
         """
         return self.realname
 
+    def updateIP( self ):
+        """
+        Return updated IP address based on ifconfig.
+        """
+        # use pexec instead of node.cmd so that we dont read
+        # backgrounded output from the cli.
+        ifconfig, _err, _exitCode = self.node.pexec(
+            'ifconfig %s' % self.realname )
+        ips = self._ipMatchRegex.findall( ifconfig )
+        self.ip = ips[ 0 ] if ips else None
+        return self.ip
+
     @classmethod
     def next( cls ):
 	idx = Intf.index

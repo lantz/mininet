@@ -58,8 +58,8 @@ class Node( BaseNode ):
             self.rdid = None
 
         # -s: pass $* to shell, and make process easy to find in ps. The prompt
-        # is set to sentinel chr( 127 ), but may require a hash (#) in it.
-        cmd = execcmd + [ opts, 'env', 'PS1=#' + chr( 127 ), '/bin/ksh',
+        # is set to sentinel chr( 127 ).
+        cmd = execcmd + [ opts, 'env', 'PS1=' + chr( 127 ), '/bin/ksh',
                           '-is', 'mininet:' + self.name ]
         return Popen( cmd, stdin=slave, stdout=slave, stderr=slave,
                       close_fds=False )
@@ -68,34 +68,11 @@ class Node( BaseNode ):
         "mount private directories"
         # **Not applicable until further notice**
         pass
-        # Avoid expanding a string into a list of chars
-        #assert not isinstance( self.privateDirs, basestring )
-        #for directory in self.privateDirs:
-        #    if isinstance( directory, tuple ):
-        #        # mount given private directory onto mountpoint
-        #        mountPoint = directory[ 1 ] % self.__dict__
-        #        privateDir = directory[ 0 ]
-        #        diffDir = mountPoint + '_diff'
-        #        quietRun( 'mkdir -p %s %s %s' %
-        #                       ( privateDir, mountPoint, diffDir ) )
-        #        quietRun( 'mount -t nullfs %s %s' % ( privateDir, mountPoint ) )
-        #        quietRun( 'mount -t unionfs %s %s' % ( diffDir, mountPoint ) )
-        #    else:
-        #        # mount temporary filesystem on directory + name
-        #        quietRun( 'mkdir -p %s' % directory + self.name )
-        #        quietRun( 'mount -n -t tmpfs tmpfs %s' % directory + self.name )
 
     def unmountPrivateDirs( self ):
         "mount private directories -  overridden"
         # **Not applicable until further notice**
         pass
-        #for directory in self.privateDirs:
-        #    # all ops are from prison0
-        #    if isinstance( directory, tuple ):
-        #        quietRun( 'umount %s' % directory[ 1 ] % self.__dict__ )
-        #        quietRun( 'umount %s' % directory[ 1 ] % self.__dict__ )
-        #    else:
-        #        quietRun( 'umount %s' % directory + self.name )
 
     def terminate( self ):
         """ Cleanup when node is killed.  """

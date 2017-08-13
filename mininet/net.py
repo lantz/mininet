@@ -821,7 +821,7 @@ class Mininet( object ):
         client, server = hosts
         output( '*** Iperf: testing', l4Type, 'bandwidth between',
                 client, 'and', server, '\n' )
-        server.cmd( 'killall -9 iperf' )
+        server.cmd( 'pkill -9 iperf' )
         iperfArgs = 'iperf -p %d ' % port
         bwArgs = ''
         if l4Type == 'UDP':
@@ -916,9 +916,9 @@ class Mininet( object ):
            dst: node name
            status: string {up, down}"""
         if src not in self.nameToNode:
-            error( 'src not in network: %s\n' % src )
+            error( 'src node not in network: %s\n' % src )
         elif dst not in self.nameToNode:
-            error( 'dst not in network: %s\n' % dst )
+            error( 'dst node not in network: %s\n' % dst )
         else:
             src = self.nameToNode[ src ]
             dst = self.nameToNode[ dst ]
