@@ -130,7 +130,7 @@ class Node( BaseNode ):
 
     def sendInt( self, intr=chr( 3 ) ):
         "Interrupt running command."
-        quietRun( "pkill -2 -f -- '%s'" % self.lastCmd )
+        quietRun( 'kill -2 %s' % self.lastPid )
 
     def setHostRoute( self, ip, intf ):
         """Add route to host.

@@ -831,7 +831,7 @@ class Mininet( object ):
             raise Exception( 'Unexpected l4 type: %s' % l4Type )
         if fmt:
             iperfArgs += '-f %s ' % fmt
-        server.sendCmd( iperfArgs + '-s' )
+        server.cmd( iperfArgs + '-s &' )
         if l4Type == 'TCP':
             if not waitListening( client, server.IP(), port ):
                 raise Exception( 'Could not connect to iperf on port %d'

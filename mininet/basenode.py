@@ -193,7 +193,7 @@ class BaseNode( object ):
            args: command and arguments, or string
            printPid: print command's PID? (False)"""
         assert self.shell and not self.waiting
-        printPid = kwargs.get( 'printPid', False )
+        printPid = kwargs.get( 'printPid', True )
         # Allow sendCmd( [ list ] )
         if len( args ) == 1 and isinstance( args[ 0 ], list ):
             cmd = args[ 0 ]

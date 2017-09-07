@@ -1026,9 +1026,10 @@ class Controller( Node ):
         self.execed = False
 
     def stop( self, *args, **kwargs ):
-        "Stop controller."
-        pids = " ".join( self.cmd( 'pgrep -f ' + self.command ).split( '\n' ) )
-        debug( pids )
+        """
+	Stop controller. Find processes associated with the command, and kill
+	them.
+	"""
         self.cmd( 'kill ' + pids + ' 2>/dev/null' )
         self.cmd( 'wait ' + pids )
         super( Controller, self ).stop( *args, **kwargs )
