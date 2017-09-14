@@ -1030,6 +1030,7 @@ class Controller( Node ):
 	Stop controller. Find processes associated with the command, and kill
 	them.
 	"""
+        pids = " ".join( self.cmd( 'pgrep ' + self.command ).split( '\n' ) )
         self.cmd( 'kill ' + pids + ' 2>/dev/null' )
         self.cmd( 'wait ' + pids )
         super( Controller, self ).stop( *args, **kwargs )
