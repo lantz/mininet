@@ -52,6 +52,7 @@ Future enhancements:
 - Create proxy objects for remote nodes (Mininet: Cluster Edition)
 """
 
+import codecs
 import os
 import pty
 import re
@@ -105,6 +106,9 @@ class Node( object ):
                 None, None, None, None, None, None, None, None )
         self.waiting = False
         self.readbuf = ''
+
+        # Incremental utf-8 decoder for buffered reading
+        self.decoder = codecs.getincrementaldecoder( 'utf-8' )( )
 
         # Start command interpreter shell
         self.master, self.slave = None, None  # pylint
@@ -229,19 +233,19 @@ class Node( object ):
 
     # Subshell I/O, commands and control
 
-    def read( self, maxbytes=1024 ):
+    def read( self, size=1024 ):
         """Buffered read from node, potentially blocking.
-           maxbytes: maximum number of bytes to return"""
+           size: maximum number of characters to return"""
         count = len( self.readbuf )
-        if count < maxbytes:
-            data = decode( os.read( self.stdout.fileno(), maxbytes - count ) )
-            self.readbuf += data
-        if maxbytes >= len( self.readbuf ):
+        if count < size:
+            data = os.read( self.stdout.fileno(), size - count )
+            self.readbuf += self.decoder.decode( data )
+        if size >= len( self.readbuf ):
             result = self.readbuf
             self.readbuf = ''
         else:
-            result = self.readbuf[ :maxbytes ]
-            self.readbuf = self.readbuf[ maxbytes: ]
+            result = self.readbuf[ :size ]
+            self.readbuf = self.readbuf[ size: ]
         return result
 
     def readline( self ):
