@@ -108,7 +108,7 @@ class Node( object ):
         self.readbuf = ''
 
         # Incremental utf-8 decoder for buffered reading
-        self.decoder = codecs.getincrementaldecoder( 'utf-8' )( )
+        self.read_decoder = codecs.getincrementaldecoder( 'utf-8' )( )
 
         # Start command interpreter shell
         self.master, self.slave = None, None  # pylint
@@ -239,7 +239,9 @@ class Node( object ):
         count = len( self.readbuf )
         if count < size:
             data = os.read( self.stdout.fileno(), size - count )
-            self.readbuf += self.decoder.decode( data )
+            if Python3:
+                data = self.read_decoder.decode( data )
+            self.readbuf += data
         if size >= len( self.readbuf ):
             result = self.readbuf
             self.readbuf = ''
