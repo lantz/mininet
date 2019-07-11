@@ -52,7 +52,6 @@ Future enhancements:
 - Create proxy objects for remote nodes (Mininet: Cluster Edition)
 """
 
-import codecs
 import os
 import pty
 import re
@@ -64,7 +63,7 @@ from time import sleep
 from mininet.log import info, error, warn, debug
 from mininet.util import ( quietRun, errRun, errFail, moveIntf, isShellBuiltin,
                            numCores, retry, mountCgroups, BaseString, decode,
-                           encode, Python3, which )
+                           encode, getincrementaldecoder, Python3, which )
 from mininet.moduledeps import moduleDeps, pathCheck, TUN
 from mininet.link import Link, Intf, TCIntf, OVSIntf
 from re import findall
@@ -107,8 +106,8 @@ class Node( object ):
         self.waiting = False
         self.readbuf = ''
 
-        # Incremental utf-8 decoder for buffered reading
-        self.read_decoder = codecs.getincrementaldecoder( 'utf-8' )( )
+        # Incremental decoder for buffered reading
+        self.decoder = getincrementaldecoder()
 
         # Start command interpreter shell
         self.master, self.slave = None, None  # pylint
@@ -239,9 +238,7 @@ class Node( object ):
         count = len( self.readbuf )
         if count < size:
             data = os.read( self.stdout.fileno(), size - count )
-            if Python3:
-                data = self.read_decoder.decode( data )
-            self.readbuf += data
+            self.readbuf += self.decoder.decode( data )
         if size >= len( self.readbuf ):
             result = self.readbuf
             self.readbuf = ''

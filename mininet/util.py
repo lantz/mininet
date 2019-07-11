@@ -13,23 +13,48 @@ from os import O_NONBLOCK
 import os
 from functools import partial
 import sys
+import codecs
 
 # Python 2/3 compatibility
+
 Python3 = sys.version_info[0] == 3
 BaseString = str if Python3 else getattr( str, '__base__' )
 Encoding = 'utf-8' if Python3 else None
-def decode( s ):
-    "Decode a byte string if needed for Python 3"
-    return s.decode( Encoding ) if Python3 else s
-def encode( s ):
-    "Encode a byte string if needed for Python 3"
-    return s.encode( Encoding ) if Python3 else s
+class NullCodec( object ):
+    "Null codec for Python 2"
+    @staticmethod
+    def decode( buf ):
+        "Null decode"
+        return buf
+
+    @staticmethod
+    def encode( buf ):
+        "Null encode"
+        return buf
+
+
+if Python3:
+    def decode( buf ):
+        "Decode buffer for Python 3"
+        return buf.decode( Encoding )
+
+    def encode( buf ):
+        "Encode buffer for Python 3"
+        return buf.encode( Encoding )
+    getincrementaldecoder = codecs.getincrementaldecoder( Encoding )
+else:
+    decode, encode = NullCodec.decode, NullCodec.encode
+
+    def getincrementaldecoder():
+        "Return null codec for Python 2"
+        return NullCodec
+
 try:
     # pylint: disable=import-error
     oldpexpect = None
     import pexpect as oldpexpect
-    # pylint: enable=import-error
 
+    # pylint: enable=import-error
     class Pexpect( object ):
         "Custom pexpect that is compatible with str"
         @staticmethod
@@ -119,6 +144,7 @@ def errRun( *cmd, **kwargs ):
     out, err = '', ''
     poller = poll()
     poller.register( popen.stdout, POLLIN )
+    decoder = getincrementaldecoder()
     fdtofile = { popen.stdout.fileno(): popen.stdout }
     outDone, errDone = False, True
     if popen.stderr:
@@ -130,9 +156,7 @@ def errRun( *cmd, **kwargs ):
         for fd, event in readable:
             f = fdtofile[ fd ]
             if event & POLLIN:
-                data = f.read( 1024 )
-                if Python3:
-                    data = data.decode( Encoding )
+                data = decoder.decode( f.read( 1024 ) )
                 if echo:
                     output( data )
                 if f == popen.stdout:
@@ -187,7 +211,9 @@ def isShellBuiltin( cmd ):
         cmd = cmd[ :space]
     return cmd in isShellBuiltin.builtIns
 
+
 isShellBuiltin.builtIns = None
+
 
 # Interface management
 #
@@ -375,7 +401,7 @@ def netParse( ipstr ):
     if '/' in ipstr:
         ip, pf = ipstr.split( '/' )
         prefixLen = int( pf )
-    #if no prefix is specified, set the prefix to 24
+    # if no prefix is specified, set the prefix to 24
     else:
         ip = ipstr
         prefixLen = 24
@@ -417,6 +443,7 @@ def pmonitor(popens, timeoutms=500, readline=True,
        yields: host, line/output (if any)
        terminates: when all EOFs received"""
     poller = poll()
+    decoder = getincrementaldecoder()
     fdToHost = {}
     for host, popen in popens.items():
         fd = popen.stdout.fileno()
@@ -434,8 +461,8 @@ def pmonitor(popens, timeoutms=500, readline=True,
                     while True:
                         try:
                             f = popen.stdout
-                            line = decode( f.readline() if readline
-                                           else f.read( readmax ) )
+                            line = decoder.decode( f.readline() if readline
+                                                   else f.read( readmax ) )
                         except IOError:
                             line = ''
                         if line == '':
@@ -450,19 +477,19 @@ def pmonitor(popens, timeoutms=500, readline=True,
 # Other stuff we use
 def sysctlTestAndSet( name, limit ):
     "Helper function to set sysctl limits"
-    #convert non-directory names into directory names
+    # convert non-directory names into directory names
     if '/' not in name:
         name = '/proc/sys/' + name.replace( '.', '/' )
-    #read limit
+    # read limit
     with open( name, 'r' ) as readFile:
         oldLimit = readFile.readline()
         if isinstance( limit, int ):
-            #compare integer limits before overriding
+            # compare integer limits before overriding
             if int( oldLimit ) < limit:
                 with open( name, 'w' ) as writeFile:
                     writeFile.write( "%d" % limit )
         else:
-            #overwrite non-integer limits
+            # overwrite non-integer limits
             with open( name, 'w' ) as writeFile:
                 writeFile.write( limit )
 
@@ -479,21 +506,21 @@ def fixLimits():
     try:
         rlimitTestAndSet( RLIMIT_NPROC, 8192 )
         rlimitTestAndSet( RLIMIT_NOFILE, 16384 )
-        #Increase open file limit
+        # Increase open file limit
         sysctlTestAndSet( 'fs.file-max', 10000 )
-        #Increase network buffer space
+        # Increase network buffer space
         sysctlTestAndSet( 'net.core.wmem_max', 16777216 )
         sysctlTestAndSet( 'net.core.rmem_max', 16777216 )
         sysctlTestAndSet( 'net.ipv4.tcp_rmem', '10240 87380 16777216' )
         sysctlTestAndSet( 'net.ipv4.tcp_wmem', '10240 87380 16777216' )
         sysctlTestAndSet( 'net.core.netdev_max_backlog', 5000 )
-        #Increase arp cache size
+        # Increase arp cache size
         sysctlTestAndSet( 'net.ipv4.neigh.default.gc_thresh1', 4096 )
         sysctlTestAndSet( 'net.ipv4.neigh.default.gc_thresh2', 8192 )
         sysctlTestAndSet( 'net.ipv4.neigh.default.gc_thresh3', 16384 )
-        #Increase routing table size
+        # Increase routing table size
         sysctlTestAndSet( 'net.ipv4.route.max_size', 32768 )
-        #Increase number of PTYs for nodes
+        # Increase number of PTYs for nodes
         sysctlTestAndSet( 'kernel.pty.max', 20000 )
     # pylint: disable=broad-except
     except Exception:
