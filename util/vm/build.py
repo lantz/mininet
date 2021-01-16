@@ -168,7 +168,7 @@ def depend():
          ' kvmtool cloud-utils genisoimage qemu-kvm qemu-utils'
          ' e2fsprogs curl'
          ' python-setuptools mtools zip' )
-    run( 'sudo easy_install pexpect' )
+    run( 'sudo python2.7 -m pip install pexpect' )
 
 
 def popen( cmd ):
